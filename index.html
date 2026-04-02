@@ -4,113 +4,455 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MK Chess Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, sans-serif; background: transparent; padding: 0.75rem; }
-  #chess-cal { max-width: 480px; margin: 0 auto; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: #fff;
+    color: #1f1f1f;
+    padding: 0;
+  }
+
+  .cal-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 16px 24px;
+  }
+
+  /* Header */
+  .cal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .cal-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: #1f1f1f;
+    flex: 1;
+    letter-spacing: -0.2px;
+  }
+  .cal-title span { color: #70757a; font-weight: 400; }
+  .nav-btn {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .nav-btn:hover { background: #f1f3f4; }
+  .nav-btn svg { width: 18px; height: 18px; }
+  .today-btn {
+    background: none;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #3c4043;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .today-btn:hover { background: #f1f3f4; }
+
+  /* Day headers */
+  .day-headers {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 2px;
+  }
+  .day-header {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: #70757a;
+    padding: 4px 0 8px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Grid */
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-top: 1px solid #e0e0e0;
+    border-left: 1px solid #e0e0e0;
+  }
+  .cal-cell {
+    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    min-height: 80px;
+    padding: 4px 4px 6px;
+    position: relative;
+    cursor: default;
+    transition: background 0.1s;
+  }
+  .cal-cell.other-month { background: #fafafa; }
+  .cal-cell:hover { background: #f8f9fa; }
+
+  /* Date number */
+  .date-num {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 400;
+    color: #3c4043;
+    margin: 0 auto 4px;
+  }
+  .cal-cell.today .date-num {
+    background: #1a73e8;
+    color: #fff;
+    font-weight: 600;
+  }
+  .cal-cell.other-month .date-num { color: #b0b0b0; }
+
+  /* Event chips */
+  .event-chip {
+    display: block;
+    width: 100%;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 18px;
+    text-decoration: none;
+    border: none;
+    text-align: left;
+    font-family: 'Sora', sans-serif;
+    cursor: pointer;
+    transition: filter 0.12s;
+  }
+  .event-chip:hover { filter: brightness(0.92); }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 8px 28px rgba(0,0,0,0.12);
+    padding: 16px;
+    width: 248px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .tooltip.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .tt-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .tt-title-wrap { display: flex; align-items: center; gap: 8px; }
+  .tt-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .tt-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f1f1f;
+    line-height: 1.3;
+  }
+  .tt-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 0 0 4px;
+    flex-shrink: 0;
+  }
+  .tt-close:hover { color: #333; }
+  .tt-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 12.5px;
+    color: #5f6368;
+    margin-bottom: 7px;
+    line-height: 1.45;
+  }
+  .tt-row svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+  .tt-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #1a73e8;
+    text-decoration: none;
+    padding: 5px 12px;
+    border-radius: 6px;
+    background: #e8f0fe;
+    transition: background 0.15s;
+  }
+  .tt-link:hover { background: #d2e3fc; }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #e0e0e0;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #5f6368;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 420px) {
+    .cal-title { font-size: 16px; }
+    .cal-cell { min-height: 58px; padding: 2px 2px 4px; }
+    .date-num { width: 22px; height: 22px; font-size: 10px; }
+    .event-chip { font-size: 9px; padding: 1px 3px; line-height: 15px; }
+    .today-btn { display: none; }
+  }
 </style>
 </head>
 <body>
-<div id="chess-cal"></div>
+<div class="cal-wrap">
+  <div class="cal-header">
+    <button class="nav-btn" id="btn-prev">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="cal-title" id="cal-title"></div>
+    <button class="nav-btn" id="btn-next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button class="today-btn" id="btn-today">Today</button>
+  </div>
+
+  <div class="day-headers">
+    <div class="day-header">Mon</div><div class="day-header">Tue</div><div class="day-header">Wed</div>
+    <div class="day-header">Thu</div><div class="day-header">Fri</div><div class="day-header">Sat</div>
+    <div class="day-header">Sun</div>
+  </div>
+
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <div class="tt-header">
+    <div class="tt-title-wrap">
+      <div class="tt-dot" id="tt-dot"></div>
+      <div class="tt-title" id="tt-title"></div>
+    </div>
+    <button class="tt-close" id="tt-close">✕</button>
+  </div>
+  <div class="tt-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span id="tt-time"></span>
+  </div>
+  <div class="tt-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    <span id="tt-loc"></span>
+  </div>
+  <div class="tt-row" id="tt-desc-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span id="tt-desc"></span>
+  </div>
+  <a class="tt-link" id="tt-link" href="#" target="_parent">View session →</a>
+</div>
+
 <script>
 (function(){
-  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var dows=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  var now=new Date();
-  var viewYear=now.getFullYear(),viewMonth=now.getMonth();
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DAYS_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-  function lastFriday(y,m){var d=new Date(y,m+1,0);while(d.getDay()!==5)d.setDate(d.getDate()-1);return d.getDate();}
-  function firstWednesday(y,m){var d=new Date(y,m,1);while(d.getDay()!==3)d.setDate(d.getDate()+1);return d.getDate();}
-  function secondThursday(y,m){var d=new Date(y,m,1);var c=0;while(c<2){if(d.getDay()===4)c++;if(c<2)d.setDate(d.getDate()+1);}return d.getDate();}
-  function getAllSundays(y,m){var sundays=[];var d=new Date(y,m,1);while(d.getDay()!==0)d.setDate(d.getDate()+1);while(d.getMonth()===m){sundays.push(d.getDate());d.setDate(d.getDate()+7);}return sundays;}
+  var SESSIONS = {
+    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 – 7:30 PM', location:'Unity Place, MK9 1UP',                   desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place' },
+    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 – 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR',    desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley'   },
+    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 – 7:30 PM', location:'National Badminton Centre, MK8 9LA',       desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent'   },
+    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 – 11:30 AM',location:'Willen Lake Café, MK15 0DS',               desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake' }
+  };
+
+  var LEGEND = [
+    { key:'learn',     text:'Last Fri — Unity Place'           },
+    { key:'bletchley', text:'1st Wed — Bletchley'              },
+    { key:'badminton', text:'2nd Thu — Natl Badminton Ctr'     },
+    { key:'sunday',    text:'Every Sun — Willen Lake'          }
+  ];
+
+  var now = new Date();
+  var viewYear = now.getFullYear(), viewMonth = now.getMonth();
+
+  function lastFriday(y,m)    { var d=new Date(y,m+1,0); while(d.getDay()!==5)d.setDate(d.getDate()-1); return d.getDate(); }
+  function firstWednesday(y,m){ var d=new Date(y,m,1);   while(d.getDay()!==3)d.setDate(d.getDate()+1); return d.getDate(); }
+  function secondThursday(y,m){ var d=new Date(y,m,1);var c=0;while(c<2){if(d.getDay()===4)c++;if(c<2)d.setDate(d.getDate()+1);}return d.getDate(); }
+  function allSundays(y,m)    { var s=[],d=new Date(y,m,1);while(d.getDay()!==0)d.setDate(d.getDate()+1);while(d.getMonth()===m){s.push(d.getDate());d.setDate(d.getDate()+7);}return s; }
 
   function getEvents(y,m){
     var ev={};
-    function addEv(day,item){if(!ev[day])ev[day]=[];ev[day].push(item);}
-    addEv(lastFriday(y,m),{label:'Learn Chess',bg:'#EEEDFE',color:'#3C3489',url:'https://mkchess.co.uk/#unity-place'});
-    addEv(firstWednesday(y,m),{label:'Play Chess',bg:'#E1F5EE',color:'#0F6E56',url:'https://mkchess.co.uk/#bletchley'});
-    addEv(secondThursday(y,m),{label:'Play Chess',bg:'#FAECE7',color:'#993C1D',url:'https://mkchess.co.uk/#nextevent'});
-    getAllSundays(y,m).forEach(function(d){addEv(d,{label:'Adults',bg:'#FEF3E2',color:'#B45309',url:'https://mkchess.co.uk/#willen-lake'});});
+    function add(day,key){ if(!ev[day])ev[day]=[]; ev[day].push(SESSIONS[key]); }
+    add(lastFriday(y,m),    'learn');
+    add(firstWednesday(y,m),'bletchley');
+    add(secondThursday(y,m),'badminton');
+    allSundays(y,m).forEach(function(d){ add(d,'sunday'); });
     return ev;
   }
 
-  function render(){
-    var wrap=document.getElementById('chess-cal');
-    if(!wrap)return;
-    var today=new Date();today.setHours(0,0,0,0);
-    var events=getEvents(viewYear,viewMonth);
-    var firstDay=new Date(viewYear,viewMonth,1).getDay();
-    var offset=(firstDay===0)?6:firstDay-1;
-    var daysInMonth=new Date(viewYear,viewMonth+1,0).getDate();
-    while(wrap.firstChild)wrap.removeChild(wrap.firstChild);
+  // ── Tooltip ──
+  var tip       = document.getElementById('tooltip');
+  var ttDot     = document.getElementById('tt-dot');
+  var ttTitle   = document.getElementById('tt-title');
+  var ttTime    = document.getElementById('tt-time');
+  var ttLoc     = document.getElementById('tt-loc');
+  var ttDescRow = document.getElementById('tt-desc-row');
+  var ttDesc    = document.getElementById('tt-desc');
+  var ttLink    = document.getElementById('tt-link');
+  var activeEl  = null;
+  var hideTimer = null;
 
-    // Header
-    var header=document.createElement('div');
-    header.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;';
-    var btnPrev=document.createElement('button');
-    btnPrev.innerHTML='&#8249;';
-    btnPrev.style.cssText='background:none;border:1px solid #ddd;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;line-height:1;';
-    btnPrev.addEventListener('click',function(){viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--;}render();});
-    var title=document.createElement('span');
-    title.style.cssText='font-size:17px;font-weight:600;';
-    title.textContent=months[viewMonth]+' '+viewYear;
-    var btnNext=document.createElement('button');
-    btnNext.innerHTML='&#8250;';
-    btnNext.style.cssText='background:none;border:1px solid #ddd;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;line-height:1;';
-    btnNext.addEventListener('click',function(){viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++;}render();});
-    header.appendChild(btnPrev);header.appendChild(title);header.appendChild(btnNext);
-    wrap.appendChild(header);
+  function showTip(triggerEl, session, dateStr) {
+    clearTimeout(hideTimer);
+    ttDot.style.background = session.dot;
+    ttTitle.textContent    = session.label;
+    ttTime.textContent     = dateStr + ' · ' + session.time;
+    ttLoc.textContent      = session.location;
+    ttDesc.textContent     = session.desc;
+    ttDescRow.style.display = session.desc ? 'flex' : 'none';
+    ttLink.href            = session.url;
+    activeEl = triggerEl;
+    placeTip(triggerEl);
+    tip.classList.add('visible');
+  }
+
+  function placeTip(el) {
+    var r  = el.getBoundingClientRect();
+    var tw = 248, th = 200;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var left = r.right + 10;
+    var top  = r.top;
+    if (left + tw > vw - 8) left = r.left - tw - 10;
+    if (left < 8) left = 8;
+    if (top + th > vh - 8) top = vh - th - 8;
+    if (top < 8) top = 8;
+    tip.style.left = left + 'px';
+    tip.style.top  = top  + 'px';
+  }
+
+  function scheduledHide() { hideTimer = setTimeout(hideTip, 120); }
+  function hideTip() { tip.classList.remove('visible'); activeEl = null; }
+
+  tip.addEventListener('mouseenter', function(){ clearTimeout(hideTimer); });
+  tip.addEventListener('mouseleave', scheduledHide);
+  document.getElementById('tt-close').addEventListener('click', hideTip);
+
+  // ── Render ──
+  function render() {
+    var today  = new Date(); today.setHours(0,0,0,0);
+    var events = getEvents(viewYear, viewMonth);
+
+    // Title
+    var yearStr = (viewYear !== today.getFullYear()) ? ' <span>' + viewYear + '</span>' : '';
+    document.getElementById('cal-title').innerHTML = MONTHS[viewMonth] + yearStr;
 
     // Grid
-    var grid=document.createElement('div');
-    grid.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:4px;';
-    dows.forEach(function(d){var el=document.createElement('div');el.style.cssText='text-align:center;font-size:11px;font-weight:500;color:#999;padding-bottom:6px;';el.textContent=d;grid.appendChild(el);});
-    for(var i=0;i<offset;i++){var blank=document.createElement('div');blank.style.minHeight='52px';grid.appendChild(blank);}
-    for(var d=1;d<=daysInMonth;d++){
-      var thisDate=new Date(viewYear,viewMonth,d);
-      var isToday=thisDate.getTime()===today.getTime();
-      var evList=events[d];
-      var cell=document.createElement('div');
-      cell.style.cssText='min-height:52px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px;border-radius:8px;';
-      var num=document.createElement('div');
-      num.style.cssText='width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;';
-      num.style.background=isToday?'#1a1a1a':'transparent';
-      num.style.color=isToday?'#fff':'#444';
-      num.style.fontWeight=isToday?'600':'400';
-      num.textContent=d;
-      cell.appendChild(num);
-      if(evList){evList.forEach(function(ev){
-        var pill=document.createElement('a');
-        pill.href=ev.url;
-        pill.target='_parent';
-        pill.style.cssText='font-size:10px;font-weight:500;padding:2px 6px;border-radius:20px;text-decoration:none;white-space:nowrap;display:block;';
-        pill.style.background=ev.bg;
-        pill.style.color=ev.color;
-        pill.textContent=ev.label;
-        cell.appendChild(pill);
-      });}
-      grid.appendChild(cell);
+    var grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    var firstDay    = new Date(viewYear, viewMonth, 1).getDay();
+    var offset      = (firstDay === 0) ? 6 : firstDay - 1;
+    var daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    var prevDays    = new Date(viewYear, viewMonth, 0).getDate();
+
+    for (var i = offset-1; i >= 0; i--)         appendCell(grid, prevDays-i, true,  false, null, '');
+    for (var d = 1; d <= daysInMonth; d++) {
+      var date    = new Date(viewYear, viewMonth, d);
+      var isToday = date.getTime() === today.getTime();
+      var dow     = date.getDay(); // 0=Sun
+      var dowIdx  = (dow === 0) ? 6 : dow - 1;
+      var dateStr = DAYS_SHORT[dowIdx] + ' ' + d + ' ' + MONTHS[viewMonth].slice(0,3);
+      appendCell(grid, d, false, isToday, events[d]||null, dateStr);
     }
-    var remaining=42-(offset+daysInMonth);
-    for(var i=0;i<remaining;i++){var blank=document.createElement('div');blank.style.minHeight='52px';grid.appendChild(blank);}
-    wrap.appendChild(grid);
+    var total = offset + daysInMonth;
+    var rows  = Math.ceil(total / 7) * 7;
+    for (var i = 1; i <= rows - total; i++)      appendCell(grid, i, true, false, null, '');
 
     // Legend
-    var legend=document.createElement('div');
-    legend.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;';
-    [{bg:'#EEEDFE',color:'#3C3489',label:'Learn Chess',text:'Last Fri — Unity Place'},
-     {bg:'#E1F5EE',color:'#0F6E56',label:'Play Chess',text:'1st Wed — Bletchley'},
-     {bg:'#FAECE7',color:'#993C1D',label:'Play Chess',text:'2nd Thu — Natl Badminton Ctr'},
-     {bg:'#FEF3E2',color:'#B45309',label:'Adults',text:'Every Sun — Willen Lake'}
-    ].forEach(function(item){
-      var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:6px;font-size:12px;color:#666;width:100%;';
-      var pill=document.createElement('span');pill.style.cssText='font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;flex-shrink:0;';
-      pill.style.background=item.bg;pill.style.color=item.color;pill.textContent=item.label;
-      row.appendChild(pill);row.appendChild(document.createTextNode(item.text));
-      legend.appendChild(row);
+    var leg = document.getElementById('legend');
+    leg.innerHTML = '';
+    LEGEND.forEach(function(item){
+      var s   = SESSIONS[item.key];
+      var row = document.createElement('div'); row.className = 'legend-item';
+      var dot = document.createElement('span'); dot.className = 'legend-dot'; dot.style.background = s.dot;
+      row.appendChild(dot);
+      row.appendChild(document.createTextNode(item.text));
+      leg.appendChild(row);
     });
-    wrap.appendChild(legend);
   }
+
+  function appendCell(grid, d, otherMonth, isToday, evList, dateStr) {
+    var cell = document.createElement('div');
+    var cls  = 'cal-cell';
+    if (otherMonth) cls += ' other-month';
+    if (isToday)    cls += ' today';
+    cell.className = cls;
+
+    var num = document.createElement('div');
+    num.className   = 'date-num';
+    num.textContent = d;
+    cell.appendChild(num);
+
+    if (evList) {
+      evList.forEach(function(ev){
+        var chip = document.createElement('button');
+        chip.className       = 'event-chip';
+        chip.textContent     = ev.label;
+        chip.style.background= ev.bg;
+        chip.style.color     = ev.color;
+        chip.addEventListener('mouseenter', function(){ showTip(chip, ev, dateStr); });
+        chip.addEventListener('mouseleave', scheduledHide);
+        cell.appendChild(chip);
+      });
+    }
+    grid.appendChild(cell);
+  }
+
+  document.getElementById('btn-prev').addEventListener('click',  function(){ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} hideTip(); render(); });
+  document.getElementById('btn-next').addEventListener('click',  function(){ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} hideTip(); render(); });
+  document.getElementById('btn-today').addEventListener('click', function(){ var n=new Date();viewYear=n.getFullYear();viewMonth=n.getMonth(); hideTip(); render(); });
 
   render();
 })();
