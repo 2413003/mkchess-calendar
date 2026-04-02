@@ -1,0 +1,80 @@
+<div id="chess-cal" style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:1rem 0;"></div>
+<script>
+(function(){
+var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var dows=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+var now=new Date();
+var viewYear=now.getFullYear(),viewMonth=now.getMonth();
+function lastFriday(y,m){var d=new Date(y,m+1,0);while(d.getDay()!==5)d.setDate(d.getDate()-1);return d.getDate();}
+function firstWednesday(y,m){var d=new Date(y,m,1);while(d.getDay()!==3)d.setDate(d.getDate()+1);return d.getDate();}
+function secondThursday(y,m){var d=new Date(y,m,1);var c=0;while(c<2){if(d.getDay()===4)c++;if(c<2)d.setDate(d.getDate()+1);}return d.getDate();}
+function getAllSundays(y,m){var sundays=[];var d=new Date(y,m,1);while(d.getDay()!==0)d.setDate(d.getDate()+1);while(d.getMonth()===m){sundays.push(d.getDate());d.setDate(d.getDate()+7);}return sundays;}
+function getEvents(y,m){
+  var ev={};
+  // Multi-event support: store as array
+  function addEv(day,item){if(!ev[day])ev[day]=[];ev[day].push(item);}
+  addEv(lastFriday(y,m),{label:'Learn Chess',bg:'#EEEDFE',color:'#3C3489',url:'https://mkchess.co.uk/#unity-place'});
+  addEv(firstWednesday(y,m),{label:'Play Chess',bg:'#E1F5EE',color:'#0F6E56',url:'https://mkchess.co.uk/#bletchley'});
+  addEv(secondThursday(y,m),{label:'Play Chess',bg:'#FAECE7',color:'#993C1D',url:'https://mkchess.co.uk/#nextevent'});
+  getAllSundays(y,m).forEach(function(d){addEv(d,{label:'Adults',bg:'#FEF3E2',color:'#B45309',url:'https://mkchess.co.uk/#willen-lake'});});
+  return ev;
+}
+function render(){
+  var wrap=document.getElementById('chess-cal');
+  if(!wrap)return;
+  var today=new Date();today.setHours(0,0,0,0);
+  var events=getEvents(viewYear,viewMonth);
+  var firstDay=new Date(viewYear,viewMonth,1).getDay();
+  var offset=(firstDay===0)?6:firstDay-1;
+  var daysInMonth=new Date(viewYear,viewMonth+1,0).getDate();
+  while(wrap.firstChild)wrap.removeChild(wrap.firstChild);
+  var header=document.createElement('div');
+  header.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;';
+  var btnPrev=document.createElement('button');
+  btnPrev.innerHTML='&#8249;';
+  btnPrev.style.cssText='background:none;border:1px solid #ddd;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;line-height:1;';
+  btnPrev.addEventListener('click',function(){viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--;}render();});
+  var title=document.createElement('span');
+  title.style.cssText='font-size:17px;font-weight:600;';
+  title.textContent=months[viewMonth]+' '+viewYear;
+  var btnNext=document.createElement('button');
+  btnNext.innerHTML='&#8250;';
+  btnNext.style.cssText='background:none;border:1px solid #ddd;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;line-height:1;';
+  btnNext.addEventListener('click',function(){viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++;}render();});
+  header.appendChild(btnPrev);header.appendChild(title);header.appendChild(btnNext);
+  wrap.appendChild(header);
+  var grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:4px;';
+  dows.forEach(function(d){var el=document.createElement('div');el.style.cssText='text-align:center;font-size:11px;font-weight:500;color:#999;padding-bottom:6px;';el.textContent=d;grid.appendChild(el);});
+  for(var i=0;i<offset;i++){var el=document.createElement('div');el.style.minHeight='52px';grid.appendChild(el);}
+  for(var d=1;d<=daysInMonth;d++){
+    var thisDate=new Date(viewYear,viewMonth,d);
+    var isToday=thisDate.getTime()===today.getTime();
+    var evList=events[d];
+    var cell=document.createElement('div');
+    cell.style.cssText='min-height:52px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px;border-radius:8px;';
+    var num=document.createElement('div');
+    num.style.cssText='width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;';
+    num.style.background=isToday?'#1a1a1a':'transparent';
+    num.style.color=isToday?'#fff':'#444';
+    num.style.fontWeight=isToday?'600':'400';
+    num.textContent=d;
+    cell.appendChild(num);
+    if(evList){evList.forEach(function(ev){var pill=document.createElement('a');pill.href=ev.url;pill.style.cssText='font-size:10px;font-weight:500;padding:2px 6px;border-radius:20px;text-decoration:none;white-space:nowrap;';pill.style.background=ev.bg;pill.style.color=ev.color;pill.textContent=ev.label;cell.appendChild(pill);});}
+    grid.appendChild(cell);
+  }
+  var remaining=42-(offset+daysInMonth);
+  for(var i=0;i<remaining;i++){var el=document.createElement('div');el.style.minHeight='52px';grid.appendChild(el);}
+  wrap.appendChild(grid);
+  var legend=document.createElement('div');
+  legend.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;';
+  [{bg:'#EEEDFE',color:'#3C3489',label:'Learn Chess',text:'Last Fri — Unity Place'},{bg:'#E1F5EE',color:'#0F6E56',label:'Play Chess',text:'1st Wed — Bletchley'},{bg:'#FAECE7',color:'#993C1D',label:'Play Chess',text:'2nd Thu — Natl Badminton Ctr'},{bg:'#FEF3E2',color:'#B45309',label:'Adults',text:'Every Sun — Willen Lake'}].forEach(function(item){
+    var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:6px;font-size:12px;color:#666;';
+    var pill=document.createElement('span');pill.style.cssText='font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;';pill.style.background=item.bg;pill.style.color=item.color;pill.textContent=item.label;
+    row.appendChild(pill);row.appendChild(document.createTextNode(item.text));legend.appendChild(row);
+  });
+  wrap.appendChild(legend);
+}
+render();
+})();
+</script>
