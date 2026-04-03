@@ -62,7 +62,10 @@
   }
   .nav-btn:hover { background: #f1f3f4; }
   .nav-btn svg { width: 16px; height: 16px; }
-  .cal-title {
+  .cal-title-btn {
+    background: none;
+    border: none;
+    font-family: 'Sora', sans-serif;
     font-size: 20px;
     font-weight: 500;
     color: #1f1f1f;
@@ -71,14 +74,99 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    cursor: default;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background 0.15s;
     user-select: none;
   }
-  .cal-title .caret {
+  .cal-title-btn:hover { background: #f1f3f4; }
+  .cal-title-btn .caret {
     width: 20px;
     height: 20px;
     color: #5f6368;
     flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .cal-title-btn.open .caret { transform: rotate(180deg); }
+
+  /* Month picker popup */
+  .month-picker {
+    position: absolute;
+    top: 52px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px) scale(0.97);
+    z-index: 999;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12), 0 12px 36px rgba(0,0,0,0.12);
+    padding: 16px;
+    width: 260px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s, transform 0.18s;
+  }
+  .month-picker.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  .mp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .mp-year {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f1f1f;
+  }
+  .mp-nav {
+    background: none;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    transition: background 0.15s;
+  }
+  .mp-nav:hover { background: #f1f3f4; }
+  .mp-nav svg { width: 15px; height: 15px; }
+  .mp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .mp-month {
+    background: none;
+    border: none;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: #3c4043;
+    padding: 8px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    text-align: center;
+  }
+  .mp-month:hover { background: #f1f3f4; }
+  .mp-month.active {
+    background: #1a73e8;
+    color: #fff;
+    font-weight: 600;
+  }
+  .mp-month.current-month {
+    color: #1a73e8;
+    font-weight: 600;
+  }
+  .mp-month.active.current-month {
+    color: #fff;
   }
 
   /* Day headers */
@@ -211,7 +299,7 @@
   .tt-link:hover { background: #d2e3fc; }
 
   @media (max-width: 420px) {
-    .cal-title { font-size: 16px; }
+    .cal-title-btn { font-size: 16px; }
     .date-num { width: 18px; height: 18px; font-size: 9px; }
     .event-chip { font-size: 8px; padding: 1px 3px; line-height: 14px; }
     .today-btn { padding: 5px 10px; font-size: 12px; }
@@ -220,7 +308,7 @@
 </head>
 <body>
 <div class="cal-wrap">
-  <div class="cal-header">
+  <div class="cal-header" style="position:relative;">
     <button class="today-btn" id="btn-today">Today</button>
     <button class="nav-btn" id="btn-prev">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -228,9 +316,23 @@
     <button class="nav-btn" id="btn-next">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <div class="cal-title" id="cal-title">
+    <button class="cal-title-btn" id="cal-title-btn">
       <span id="cal-title-text"></span>
-      <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+
+    <!-- Month picker -->
+    <div class="month-picker" id="month-picker">
+      <div class="mp-header">
+        <button class="mp-nav" id="mp-prev">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="mp-year" id="mp-year"></div>
+        <button class="mp-nav" id="mp-next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="mp-grid" id="mp-grid"></div>
     </div>
   </div>
 
@@ -269,8 +371,9 @@
 
 <script>
 (function(){
-  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var DAYS_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var MONTHS      = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONTHS_SHORT= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYS_SHORT  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var SESSIONS = {
     learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 – 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place' },
@@ -280,33 +383,84 @@
   };
 
   var SUNDAY_START = new Date(2026, 3, 19);
-
   var now = new Date();
   var viewYear = now.getFullYear(), viewMonth = now.getMonth();
+  var pickerYear = viewYear;
+  var pickerOpen = false;
 
+  // ── Event logic ──
   function lastFriday(y,m)    { var d=new Date(y,m+1,0); while(d.getDay()!==5)d.setDate(d.getDate()-1); return d.getDate(); }
   function firstWednesday(y,m){ var d=new Date(y,m,1); while(d.getDay()!==3)d.setDate(d.getDate()+1); return d.getDate(); }
   function secondThursday(y,m){ var d=new Date(y,m,1);var c=0;while(c<2){if(d.getDay()===4)c++;if(c<2)d.setDate(d.getDate()+1);}return d.getDate(); }
   function allSundays(y,m) {
     var s=[],d=new Date(y,m,1);
     while(d.getDay()!==0) d.setDate(d.getDate()+1);
-    while(d.getMonth()===m){
-      if(d >= SUNDAY_START) s.push(d.getDate());
-      d.setDate(d.getDate()+7);
-    }
+    while(d.getMonth()===m){ if(d>=SUNDAY_START) s.push(d.getDate()); d.setDate(d.getDate()+7); }
     return s;
   }
-
   function getEvents(y,m){
     var ev={};
     function add(day,key){ if(!ev[day])ev[day]=[]; ev[day].push(SESSIONS[key]); }
-    add(lastFriday(y,m),    'learn');
-    add(firstWednesday(y,m),'bletchley');
+    add(lastFriday(y,m),'learn'); add(firstWednesday(y,m),'bletchley');
     add(secondThursday(y,m),'badminton');
     allSundays(y,m).forEach(function(d){ add(d,'sunday'); });
     return ev;
   }
 
+  // ── Month picker ──
+  var pickerEl   = document.getElementById('month-picker');
+  var titleBtn   = document.getElementById('cal-title-btn');
+  var mpYearEl   = document.getElementById('mp-year');
+  var mpGrid     = document.getElementById('mp-grid');
+
+  function renderPicker() {
+    mpYearEl.textContent = pickerYear;
+    mpGrid.innerHTML = '';
+    var todayMonth = now.getMonth(), todayYear = now.getFullYear();
+    MONTHS_SHORT.forEach(function(name, i){
+      var btn = document.createElement('button');
+      btn.className = 'mp-month';
+      btn.textContent = name;
+      if (i === viewMonth && pickerYear === viewYear)    btn.classList.add('active');
+      if (i === todayMonth && pickerYear === todayYear)  btn.classList.add('current-month');
+      btn.addEventListener('click', function(){
+        viewMonth = i;
+        viewYear  = pickerYear;
+        closePicker();
+        hideTip();
+        render();
+      });
+      mpGrid.appendChild(btn);
+    });
+  }
+
+  function openPicker() {
+    pickerYear = viewYear;
+    pickerOpen = true;
+    titleBtn.classList.add('open');
+    renderPicker();
+    pickerEl.classList.add('open');
+  }
+  function closePicker() {
+    pickerOpen = false;
+    titleBtn.classList.remove('open');
+    pickerEl.classList.remove('open');
+  }
+
+  titleBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    pickerOpen ? closePicker() : openPicker();
+  });
+  document.getElementById('mp-prev').addEventListener('click', function(e){
+    e.stopPropagation(); pickerYear--; renderPicker();
+  });
+  document.getElementById('mp-next').addEventListener('click', function(e){
+    e.stopPropagation(); pickerYear++; renderPicker();
+  });
+  document.addEventListener('click', function(){ if(pickerOpen) closePicker(); });
+  pickerEl.addEventListener('click', function(e){ e.stopPropagation(); });
+
+  // ── Tooltip ──
   var tip       = document.getElementById('tooltip');
   var ttDot     = document.getElementById('tt-dot');
   var ttTitle   = document.getElementById('tt-title');
@@ -329,44 +483,39 @@
     placeTip(triggerEl);
     tip.classList.add('visible');
   }
-
   function placeTip(el) {
-    var r  = el.getBoundingClientRect();
-    var tw = 248, th = 200;
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var left = r.right + 10;
-    var top  = r.top;
-    if (left + tw > vw - 8) left = r.left - tw - 10;
-    if (left < 8) left = 8;
-    if (top + th > vh - 8) top = vh - th - 8;
-    if (top < 8) top = 8;
-    tip.style.left = left + 'px';
-    tip.style.top  = top  + 'px';
+    var r=el.getBoundingClientRect(), tw=248, th=200;
+    var vw=window.innerWidth, vh=window.innerHeight;
+    var left=r.right+10, top=r.top;
+    if(left+tw>vw-8) left=r.left-tw-10;
+    if(left<8) left=8;
+    if(top+th>vh-8) top=vh-th-8;
+    if(top<8) top=8;
+    tip.style.left=left+'px'; tip.style.top=top+'px';
   }
-
-  function scheduledHide() { hideTimer = setTimeout(hideTip, 120); }
-  function hideTip() { tip.classList.remove('visible'); }
+  function scheduledHide(){ hideTimer=setTimeout(hideTip,120); }
+  function hideTip(){ tip.classList.remove('visible'); }
 
   tip.addEventListener('mouseenter', function(){ clearTimeout(hideTimer); });
   tip.addEventListener('mouseleave', scheduledHide);
   document.getElementById('tt-close').addEventListener('click', hideTip);
 
+  // ── Main calendar render ──
   function render() {
     var today  = new Date(); today.setHours(0,0,0,0);
     var events = getEvents(viewYear, viewMonth);
 
-    // Always show "Month YYYY"
     document.getElementById('cal-title-text').textContent = MONTHS[viewMonth] + ' ' + viewYear;
 
     var grid = document.getElementById('cal-grid');
     grid.innerHTML = '';
 
     var firstDay    = new Date(viewYear, viewMonth, 1).getDay();
-    var offset      = (firstDay === 0) ? 6 : firstDay - 1;
+    var offset      = (firstDay===0) ? 6 : firstDay-1;
     var daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
     var prevDays    = new Date(viewYear, viewMonth, 0).getDate();
     var total       = offset + daysInMonth;
-    var totalCells  = Math.ceil(total / 7) * 7;
+    var totalCells  = Math.ceil(total/7)*7;
     var cellIndex   = 0;
 
     function addCell(d, otherMonth, isToday, evList, dateStr) {
@@ -375,11 +524,11 @@
       var cls  = 'cal-cell';
       if (otherMonth) cls += ' other-month';
       if (isToday)    cls += ' today';
-      if (cellIndex > totalCells - 7) cls += ' last-row';
+      if (cellIndex > totalCells-7) cls += ' last-row';
       cell.className = cls;
 
       var num = document.createElement('div');
-      num.className   = 'date-num';
+      num.className = 'date-num';
       num.textContent = d;
       cell.appendChild(num);
 
@@ -398,21 +547,21 @@
       grid.appendChild(cell);
     }
 
-    for (var i = offset-1; i >= 0; i--)    addCell(prevDays-i, true, false, null, '');
-    for (var d = 1; d <= daysInMonth; d++) {
+    for (var i=offset-1; i>=0; i--)       addCell(prevDays-i, true, false, null, '');
+    for (var d=1; d<=daysInMonth; d++) {
       var date    = new Date(viewYear, viewMonth, d);
-      var isToday = date.getTime() === today.getTime();
+      var isToday = date.getTime()===today.getTime();
       var dow     = date.getDay();
-      var dowIdx  = (dow === 0) ? 6 : dow - 1;
-      var dateStr = DAYS_SHORT[dowIdx] + ' ' + d + ' ' + MONTHS[viewMonth].slice(0,3);
+      var dowIdx  = (dow===0) ? 6 : dow-1;
+      var dateStr = DAYS_SHORT[dowIdx]+' '+d+' '+MONTHS[viewMonth].slice(0,3);
       addCell(d, false, isToday, events[d]||null, dateStr);
     }
-    for (var i = 1; i <= totalCells - total; i++) addCell(i, true, false, null, '');
+    for (var i=1; i<=totalCells-total; i++) addCell(i, true, false, null, '');
   }
 
-  document.getElementById('btn-prev').addEventListener('click',  function(){ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} hideTip(); render(); });
-  document.getElementById('btn-next').addEventListener('click',  function(){ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} hideTip(); render(); });
-  document.getElementById('btn-today').addEventListener('click', function(){ var n=new Date();viewYear=n.getFullYear();viewMonth=n.getMonth(); hideTip(); render(); });
+  document.getElementById('btn-prev').addEventListener('click',  function(){ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} hideTip(); closePicker(); render(); });
+  document.getElementById('btn-next').addEventListener('click',  function(){ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} hideTip(); closePicker(); render(); });
+  document.getElementById('btn-today').addEventListener('click', function(){ var n=new Date();viewYear=n.getFullYear();viewMonth=n.getMonth(); hideTip(); closePicker(); render(); });
 
   render();
 })();
