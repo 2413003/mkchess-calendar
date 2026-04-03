@@ -196,58 +196,191 @@
 
   /* Map view */
   #map-view {
-    flex: 1; border-radius: 12px; overflow: hidden;
-    min-height: 0; position: relative; border: 1px solid #e0e0e0;
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 0;
+    position: relative;
+    border: 1px solid #d8dee8;
+    background: #dfe6ed;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(15, 23, 42, 0.1);
+    isolation: isolate;
   }
   #leaflet-map { width: 100%; height: 100%; }
+  #map-view::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 430;
+    background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 24%);
+  }
+
+  .map-hud {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 500;
+    pointer-events: none;
+    border-radius: 14px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  }
+  .map-hud-title { font-size: 12px; font-weight: 700; color: #111827; line-height: 1.1; }
+  .map-hud-sub { margin-top: 4px; font-size: 11px; color: #4b5563; line-height: 1.2; }
 
   /* Custom map markers */
+  .map-marker-wrap {
+    width: 1px !important;
+    height: 1px !important;
+    border: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
   .map-marker {
-    display: flex; align-items: center; gap: 5px;
-    background: #fff; border: 1.5px solid #e0e0e0; border-radius: 20px;
-    padding: 5px 11px 5px 8px;
-    font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600; color: #1f1f1f;
-    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.13);
-    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s, color 0.15s;
-    white-space: nowrap; user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(17, 24, 39, 0.14);
+    border-radius: 999px;
+    padding: 8px 13px 8px 10px;
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #111827;
+    cursor: pointer;
+    box-shadow: 0 9px 24px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(5px);
+    transform: translate(-50%, -100%);
+    transform-origin: center;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s, color 0.2s;
+    white-space: nowrap;
+    user-select: none;
+    animation: marker-rise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: var(--marker-delay, 0ms);
   }
   .map-marker:hover, .map-marker.hovered {
-    transform: scale(1.06); box-shadow: 0 4px 14px rgba(0,0,0,0.2); border-color: #aaa;
+    transform: translate(-50%, -100%) scale(1.07);
+    box-shadow: 0 16px 28px rgba(15, 23, 42, 0.28), 0 4px 10px rgba(15, 23, 42, 0.18);
+    border-color: rgba(17, 24, 39, 0.22);
   }
-  .map-marker.hovered { background: #1f1f1f; color: #fff; border-color: #1f1f1f; }
-  .map-marker .mk-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .map-marker.hovered { background: #111827; color: #fff; border-color: #111827; }
+  .map-marker .mk-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.55);
+  }
+  .map-marker.hovered .mk-dot { box-shadow: 0 0 0 3px rgba(255,255,255,0.18); }
+  @keyframes marker-rise {
+    0% { opacity: 0; transform: translate(-50%, -90%) scale(0.88); }
+    100% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+  }
 
   /* Leaflet overrides */
   .leaflet-popup-content-wrapper {
-    padding: 0 !important; border-radius: 14px !important;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 8px 28px rgba(0,0,0,0.14) !important;
-    overflow: hidden; width: 260px; font-family: 'Sora', sans-serif; border: none !important;
+    padding: 0 !important;
+    border-radius: 18px !important;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.28), 0 4px 12px rgba(15, 23, 42, 0.18) !important;
+    overflow: hidden;
+    width: 286px;
+    font-family: 'Sora', sans-serif;
+    border: none !important;
   }
-  .leaflet-popup-content { margin: 0 !important; width: 260px !important; line-height: 1; }
+  .leaflet-popup-content { margin: 0 !important; width: 286px !important; line-height: 1; }
   .leaflet-popup-tip-container { display: none !important; }
   .leaflet-popup-close-button { display: none !important; }
   .leaflet-container { font-family: 'Sora', sans-serif; }
-  .leaflet-control-zoom { border: none !important; box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important; }
-  .leaflet-control-zoom a { font-family: sans-serif; color: #3c4043 !important; border: none !important; border-bottom: 1px solid #eee !important; }
-  .leaflet-control-zoom a:last-child { border-bottom: none !important; }
-  .leaflet-control-zoom a:hover { background: #f1f3f4 !important; }
+  .leaflet-tile-pane { filter: saturate(1.06) contrast(1.04) brightness(1.02); }
+  .leaflet-control-zoom {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  .leaflet-control-zoom a {
+    width: 40px !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    border: none !important;
+    border-radius: 12px !important;
+    margin-top: 8px !important;
+    font-family: 'Sora', sans-serif !important;
+    font-size: 21px !important;
+    color: #111827 !important;
+    background: rgba(255,255,255,0.95) !important;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18) !important;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .leaflet-control-zoom a:first-child { margin-top: 0 !important; }
+  .leaflet-control-zoom a:hover {
+    background: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 20px rgba(15, 23, 42, 0.22) !important;
+  }
+  .leaflet-control-attribution {
+    border-radius: 10px !important;
+    border: 1px solid rgba(15, 23, 42, 0.1) !important;
+    background: rgba(255,255,255,0.84) !important;
+    padding: 3px 8px !important;
+    color: #4b5563 !important;
+    font-size: 10px !important;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  }
+  .leaflet-control-attribution a { color: #111827 !important; }
 
-  .map-popup-img { width: 100%; height: 130px; object-fit: cover; display: block; }
-  .map-popup-body { padding: 13px 15px 15px; }
-  .map-popup-header { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .map-popup-img { width: 100%; height: 146px; object-fit: cover; display: block; }
+  .map-popup-body { padding: 13px 15px 16px; }
+  .map-popup-tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+    color: #374151;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .map-popup-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .map-popup-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .map-popup-title { font-size: 14px; font-weight: 600; color: #1f1f1f; line-height: 1.3; }
+  .map-popup-title { font-size: 15px; font-weight: 700; color: #111827; line-height: 1.3; }
   .map-popup-row {
-    display: flex; align-items: flex-start; gap: 8px;
-    font-size: 12px; color: #5f6368; margin-bottom: 5px; line-height: 1.45;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: #4b5563;
+    margin-bottom: 7px;
+    line-height: 1.45;
   }
-  .map-popup-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
+  .map-popup-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; color: #6b7280; }
   .map-popup-link {
-    display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 500;
-    color: #1a73e8; text-decoration: none; padding: 5px 12px; border-radius: 6px;
-    background: #e8f0fe; transition: background 0.15s;
+    display: block;
+    margin-top: 12px;
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: #111827;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
   }
-  .map-popup-link:hover { background: #d2e3fc; }
+  .map-popup-link:hover {
+    background: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.3);
+  }
 
   /* Calendar tooltip */
   .tooltip {
@@ -285,6 +418,10 @@
     .today-btn { padding: 5px 10px; font-size: 12px; }
     .vt-btn { font-size: 11px; padding: 5px 9px; }
     .vt-btn svg { display: none; }
+    #map-view { border-radius: 16px; }
+    .map-hud { top: 10px; left: 10px; padding: 9px 10px; }
+    .map-hud-title { font-size: 11px; }
+    .map-hud-sub { font-size: 10px; }
   }
 </style>
 </head>
@@ -341,6 +478,10 @@
 
   <!-- Map view (hidden by default) -->
   <div id="map-view" style="display:none">
+    <div class="map-hud">
+      <div class="map-hud-title">MK Chess Venues</div>
+      <div class="map-hud-sub">Tap a marker for session details</div>
+    </div>
     <div id="leaflet-map"></div>
   </div>
 </div>
@@ -356,7 +497,7 @@
         <div class="tt-dot" id="tt-dot"></div>
         <div class="tt-title" id="tt-title"></div>
       </div>
-      <button class="tt-close" id="tt-close">✕</button>
+      <button class="tt-close" id="tt-close">x</button>
     </div>
     <div class="tt-row">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -370,7 +511,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       <span id="tt-desc"></span>
     </div>
-    <a class="tt-link" id="tt-link" href="#" target="_parent">View session →</a>
+    <a class="tt-link" id="tt-link" href="#" target="_parent">View session -></a>
   </div>
 </div>
 
@@ -381,10 +522,10 @@
   var DAYS_SHORT   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var SESSIONS = {
-    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 – 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place', img:'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf' },
-    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 – 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
-    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 – 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
-    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 – 11:30 AM',location:'Willen Lake Café, MK15 0DS',            desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake', img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8' }
+    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 - 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place', img:'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf' },
+    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 - 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
+    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 - 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
+    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 - 11:30 AM',location:'Willen Lake Cafe, MK15 0DS',          desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake', img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8' }
   };
 
   var VENUES = [
@@ -454,7 +595,7 @@
     return '';
   }
 
-  // ── Month picker ──
+  // -- Month picker --
   var pickerEl = document.getElementById('month-picker');
   var titleBtn = document.getElementById('cal-title-btn');
   var mpYearEl = document.getElementById('mp-year');
@@ -484,7 +625,7 @@
   document.addEventListener('click', function(){ if(pickerOpen) closePicker(); });
   pickerEl.addEventListener('click', function(e){ e.stopPropagation(); });
 
-  // ── View toggle ──
+  // -- View toggle --
   var calendarViewEl = document.getElementById('calendar-view');
   var mapViewEl      = document.getElementById('map-view');
   var vtCalBtn = document.getElementById('vt-calendar');
@@ -510,7 +651,7 @@
     requestAnimationFrame(function(){ requestAnimationFrame(initMap); });
   });
 
-  // ── Map (Leaflet + OpenStreetMap) ──
+  // -- Map (Leaflet + CARTO tiles) --
   var LEAFLET_VERSION = '1.9.4';
 
   function initMap() {
@@ -527,37 +668,50 @@
       document.getElementById('leaflet-map').innerHTML =
         '<div style="display:flex;align-items:center;justify-content:center;height:100%;' +
         'color:#888;font-family:Sora,sans-serif;font-size:13px;text-align:center;padding:24px;">' +
-        'Map could not load — please check your connection.</div>';
+        'Map could not load - please check your connection.</div>';
     };
     document.head.appendChild(script);
   }
-
   function _createMap() {
-    mapInstance = L.map('leaflet-map', { zoomControl: false })
+    mapInstance = L.map('leaflet-map', {
+      zoomControl: false,
+      zoomSnap: 0.25,
+      worldCopyJump: true
+    })
       .setView([52.034, -0.765], 12);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_parent">OpenStreetMap</a> contributors',
-      maxZoom: 19
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_parent">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_parent">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20,
+      detectRetina: true
+    }).addTo(mapInstance);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 20,
+      detectRetina: true
     }).addTo(mapInstance);
 
     L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
 
-    VENUES.forEach(function(venue){ addVenueMarker(venue); });
+    var markers = VENUES.map(function(venue, idx){ return addVenueMarker(venue, idx); });
+    if (markers.length) {
+      mapInstance.fitBounds(L.featureGroup(markers).getBounds(), { padding: [56, 56], maxZoom: 13 });
+    }
   }
-
-  function addVenueMarker(venue) {
+  function addVenueMarker(venue, idx) {
     var session  = SESSIONS[venue.key];
     var nextDate = getNextDate(venue.key);
-    var timeStr  = nextDate ? (nextDate + ' · ' + session.time) : session.time;
+    var timeStr  = nextDate ? (nextDate + ' | ' + session.time) : session.time;
 
     // Custom pill marker via DivIcon
     var icon = L.divIcon({
-      className: '',
-      html: '<div class="map-marker"><span class="mk-dot" style="background:' + session.dot + '"></span>' + session.label + '</div>',
+      className: 'map-marker-wrap',
+      html: '<div class="map-marker" style="--marker-delay:' + (idx * 70) + 'ms"><span class="mk-dot" style="background:' + session.dot + '"></span>' + session.label + '</div>',
       iconSize:   [1, 1],
       iconAnchor: [0, 0],
-      popupAnchor:[0, 0]
+      popupAnchor:[0, -18]
     });
 
     var marker = L.marker([venue.lat, venue.lng], { icon: icon }).addTo(mapInstance);
@@ -565,6 +719,7 @@
     var popupHTML =
       '<img class="map-popup-img" src="' + session.img + '" alt="">' +
       '<div class="map-popup-body">' +
+        '<div class="map-popup-tag">MK Chess</div>' +
         '<div class="map-popup-header">' +
           '<div class="map-popup-dot" style="background:' + session.dot + '"></div>' +
           '<div class="map-popup-title">' + session.label + '</div>' +
@@ -581,10 +736,10 @@
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>' +
           session.desc +
         '</div>' +
-        '<a class="map-popup-link" href="' + session.url + '" target="_parent">View session →</a>' +
+        '<a class="map-popup-link" href="' + session.url + '" target="_parent">View session -></a>' +
       '</div>';
 
-    var popup = L.popup({ closeButton: false, offset: [130, 30], autoPan: false }).setContent(popupHTML);
+    var popup = L.popup({ closeButton: false, offset: [0, -18], autoPan: false }).setContent(popupHTML);
 
     var popupOpen = false;
     var leaveTimer = null;
@@ -641,9 +796,11 @@
       popupOpen = false;
       if (markerEl) markerEl.querySelector('.map-marker').classList.remove('hovered');
     });
+
+    return marker;
   }
 
-  // ── Calendar tooltip ──
+  // -- Calendar tooltip --
   var tip       = document.getElementById('tooltip');
   var ttImgLink = document.getElementById('tt-img-link');
   var ttImg     = document.getElementById('tt-img');
@@ -662,7 +819,7 @@
     ttImg.src = session.img; ttImg.style.display = 'block'; ttImgLink.href = session.url;
     ttDot.style.background = session.dot;
     ttTitle.textContent    = session.label;
-    ttTime.textContent     = dateStr + ' · ' + session.time;
+    ttTime.textContent     = dateStr + ' | ' + session.time;
     ttLoc.textContent      = session.location;
     ttDesc.textContent     = session.desc;
     ttDescRow.style.display = session.desc ? 'flex' : 'none';
@@ -690,7 +847,7 @@
   tip.addEventListener('mouseleave', scheduledHide);
   document.getElementById('tt-close').addEventListener('click', hideTip);
 
-  // ── Calendar render ──
+  // -- Calendar render --
   function render() {
     if (currentView !== 'calendar') return;
     var today = new Date(); today.setHours(0,0,0,0);
@@ -750,7 +907,7 @@
     for (var i=1; i<=totalCells-total; i++) addCell(i, true, false, null, '');
   }
 
-  window.addEventListener('resize', function(){ setSquareWidth(); if(mapInstance) mapInstance.resize(); });
+  window.addEventListener('resize', function(){ setSquareWidth(); if(mapInstance) mapInstance.invalidateSize(); });
 
   document.getElementById('btn-prev').addEventListener('click',  function(){ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} hideTip(); closePicker(); render(); });
   document.getElementById('btn-next').addEventListener('click',  function(){ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} hideTip(); closePicker(); render(); });
