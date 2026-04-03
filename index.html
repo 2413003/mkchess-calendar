@@ -27,23 +27,30 @@
   .cal-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 10px;
     flex-shrink: 0;
   }
-  .cal-title {
-    font-size: 20px;
+  .today-btn {
+    background: none;
+    border: 1px solid #dadce0;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
     font-weight: 500;
-    color: #1f1f1f;
-    flex: 1;
-    letter-spacing: -0.2px;
+    color: #3c4043;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+    margin-right: 2px;
   }
-  .cal-title span { color: #70757a; font-weight: 400; }
+  .today-btn:hover { background: #f1f3f4; }
   .nav-btn {
     background: none;
     border: none;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -54,21 +61,25 @@
     flex-shrink: 0;
   }
   .nav-btn:hover { background: #f1f3f4; }
-  .nav-btn svg { width: 18px; height: 18px; }
-  .today-btn {
-    background: none;
-    border: 1px solid #dadce0;
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-family: 'Sora', sans-serif;
-    font-size: 13px;
+  .nav-btn svg { width: 16px; height: 16px; }
+  .cal-title {
+    font-size: 20px;
     font-weight: 500;
-    color: #3c4043;
-    cursor: pointer;
-    transition: background 0.15s;
-    white-space: nowrap;
+    color: #1f1f1f;
+    letter-spacing: -0.2px;
+    margin-left: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: default;
+    user-select: none;
   }
-  .today-btn:hover { background: #f1f3f4; }
+  .cal-title .caret {
+    width: 20px;
+    height: 20px;
+    color: #5f6368;
+    flex-shrink: 0;
+  }
 
   /* Day headers */
   .day-headers {
@@ -101,19 +112,17 @@
   .cal-cell {
     border-right: 1px solid #e0e0e0;
     border-bottom: 1px solid #e0e0e0;
-    padding: 4px 4px 4px;
+    padding: 4px;
     position: relative;
     cursor: default;
     transition: background 0.1s;
     overflow: hidden;
     min-height: 0;
   }
-  /* Remove right border on last column, bottom border on last row */
-  .cal-cell:nth-child(7n)   { border-right: none; }
-  .cal-cell.last-row        { border-bottom: none; }
-
-  .cal-cell.other-month { background: #fafafa; }
-  .cal-cell:hover { background: #f8f9fa; }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell.last-row      { border-bottom: none; }
+  .cal-cell.other-month   { background: #fafafa; }
+  .cal-cell:hover         { background: #f8f9fa; }
 
   /* Date number */
   .date-num {
@@ -148,7 +157,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 17px;
-    text-decoration: none;
     border: none;
     text-align: left;
     font-family: 'Sora', sans-serif;
@@ -206,21 +214,24 @@
     .cal-title { font-size: 16px; }
     .date-num { width: 18px; height: 18px; font-size: 9px; }
     .event-chip { font-size: 8px; padding: 1px 3px; line-height: 14px; }
-    .today-btn { display: none; }
+    .today-btn { padding: 5px 10px; font-size: 12px; }
   }
 </style>
 </head>
 <body>
 <div class="cal-wrap">
   <div class="cal-header">
+    <button class="today-btn" id="btn-today">Today</button>
     <button class="nav-btn" id="btn-prev">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <div class="cal-title" id="cal-title"></div>
     <button class="nav-btn" id="btn-next">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
-    <button class="today-btn" id="btn-today">Today</button>
+    <div class="cal-title" id="cal-title">
+      <span id="cal-title-text"></span>
+      <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
   </div>
 
   <div class="day-headers">
@@ -344,8 +355,8 @@
     var today  = new Date(); today.setHours(0,0,0,0);
     var events = getEvents(viewYear, viewMonth);
 
-    var yearStr = (viewYear !== today.getFullYear()) ? ' <span>' + viewYear + '</span>' : '';
-    document.getElementById('cal-title').innerHTML = MONTHS[viewMonth] + yearStr;
+    // Always show "Month YYYY"
+    document.getElementById('cal-title-text').textContent = MONTHS[viewMonth] + ' ' + viewYear;
 
     var grid = document.getElementById('cal-grid');
     grid.innerHTML = '';
@@ -356,9 +367,7 @@
     var prevDays    = new Date(viewYear, viewMonth, 0).getDate();
     var total       = offset + daysInMonth;
     var totalCells  = Math.ceil(total / 7) * 7;
-    var lastRowStart = totalCells - 6; // index of first cell in last row (1-based)
-
-    var cellIndex = 0;
+    var cellIndex   = 0;
 
     function addCell(d, otherMonth, isToday, evList, dateStr) {
       cellIndex++;
@@ -389,7 +398,7 @@
       grid.appendChild(cell);
     }
 
-    for (var i = offset-1; i >= 0; i--)    addCell(prevDays-i, true,  false, null, '');
+    for (var i = offset-1; i >= 0; i--)    addCell(prevDays-i, true, false, null, '');
     for (var d = 1; d <= daysInMonth; d++) {
       var date    = new Date(viewYear, viewMonth, d);
       var isToday = date.getTime() === today.getTime();
