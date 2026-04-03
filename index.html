@@ -387,12 +387,19 @@
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    color: #fff;
-    text-decoration: none;
+    color: #fff !important;
+    text-decoration: none !important;
     padding: 9px 12px;
     border-radius: 10px;
     background: #111827;
     transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .map-popup-link:visited,
+  .map-popup-link:hover,
+  .map-popup-link:focus,
+  .map-popup-link:active {
+    color: #fff !important;
+    text-decoration: none !important;
   }
   .map-popup-link:hover {
     background: #0f172a;
@@ -761,9 +768,9 @@
 
     var popup = L.popup({ closeButton: false, offset: [0, -18], autoPan: true, keepInView: true }).setContent(popupHTML);
 
-    var popupOpen = false;
     var leaveTimer = null;
     var markerEl;
+    var popupHoverBound = false;
 
     marker.on('add', function(){
       markerEl = marker.getElement();
@@ -773,33 +780,31 @@
       inner.addEventListener('click', function(e){
         e.preventDefault();
         e.stopPropagation();
-        if (popupOpen) { closePopup(); } else { openPopup(); }
+        togglePopup();
       });
 
       if (!usingTouch) {
         inner.addEventListener('mouseenter', function(){ openPopup(); });
         inner.addEventListener('mouseleave', function(){ scheduleClose(); });
-      } else {
-        inner.addEventListener('touchstart', function(e){
-          e.preventDefault(); e.stopPropagation();
-          if (popupOpen) { closePopup(); } else { openPopup(); }
-        }, { passive: false });
       }
     });
 
-    marker.on('click', function(){
-      if (popupOpen) { closePopup(); } else { openPopup(); }
-    });
+    function isPopupOpen() {
+      return marker.isPopupOpen();
+    }
+    function togglePopup() {
+      if (isPopupOpen()) { closePopup(); } else { openPopup(); }
+    }
 
     function openPopup() {
       clearTimeout(leaveTimer);
       if (markerEl) markerEl.querySelector('.map-marker').classList.add('hovered');
       marker.bindPopup(popup).openPopup();
-      popupOpen = true;
       // Attach leave handler to popup once it opens
       setTimeout(function(){
-        var pw = document.querySelector('.leaflet-popup');
-        if (pw && !usingTouch) {
+        var pw = marker.getPopup() && marker.getPopup().getElement();
+        if (pw && !usingTouch && !popupHoverBound) {
+          popupHoverBound = true;
           pw.addEventListener('mouseenter', function(){ clearTimeout(leaveTimer); });
           pw.addEventListener('mouseleave', function(){
             var inner2 = markerEl && markerEl.querySelector('.map-marker');
@@ -811,19 +816,17 @@
     function closePopup() {
       clearTimeout(leaveTimer);
       if (markerEl) markerEl.querySelector('.map-marker').classList.remove('hovered');
-      marker.closePopup();
-      popupOpen = false;
+      if (isPopupOpen()) marker.closePopup();
     }
     function scheduleClose() {
       leaveTimer = setTimeout(function(){
-        var pw = document.querySelector('.leaflet-popup');
+        var pw = marker.getPopup() && marker.getPopup().getElement();
         if (pw && pw.matches(':hover')) return;
         closePopup();
       }, 100);
     }
 
     marker.on('popupclose', function(){
-      popupOpen = false;
       if (markerEl) markerEl.querySelector('.map-marker').classList.remove('hovered');
     });
 
