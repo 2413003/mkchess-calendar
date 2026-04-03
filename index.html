@@ -776,32 +776,36 @@
       '</div>';
 
     var popup = L.popup({ closeButton: false, offset: [0, -18], autoPan: true, keepInView: true, closeOnClick: false }).setContent(popupHTML);
+    marker.bindPopup(popup);
 
     var leaveTimer = null;
     var markerEl;
-    var popupHoverBound = false;
-    var pinnedOpen = false;
+    var popupHoverEl = null;
 
     marker.on('add', function(){
       markerEl = marker.getElement();
       if (!markerEl) return;
       var inner = markerEl.querySelector('.map-marker');
+      if (!inner) return;
+
+      if (typeof L !== 'undefined' && L.DomEvent) {
+        L.DomEvent.disableClickPropagation(inner);
+        L.DomEvent.disableScrollPropagation(inner);
+      }
 
       inner.addEventListener('click', function(e){
         e.preventDefault();
         e.stopPropagation();
-        pinnedOpen = true;
         openPopup();
       });
 
       if (!usingTouch) {
-        inner.addEventListener('mouseenter', function(){ if (!pinnedOpen) openPopup(); });
+        inner.addEventListener('mouseenter', function(){ openPopup(); });
         inner.addEventListener('mouseleave', function(){ scheduleClose(); });
       } else {
         inner.addEventListener('touchstart', function(e){
           e.preventDefault();
           e.stopPropagation();
-          pinnedOpen = true;
           openPopup();
         }, { passive: false });
       }
@@ -811,35 +815,28 @@
       if (e && e.originalEvent && typeof L !== 'undefined' && L.DomEvent) {
         L.DomEvent.stopPropagation(e.originalEvent);
       }
-      pinnedOpen = true;
       openPopup();
-    });
-
-    mapInstance.on('click', function(){
-      pinnedOpen = false;
-      closePopup();
     });
 
     function isPopupOpen() {
       return marker.isPopupOpen();
     }
-
+    function bindPopupHoverOnce() {
+      if (usingTouch) return;
+      var pw = marker.getPopup() && marker.getPopup().getElement();
+      if (!pw || pw === popupHoverEl) return;
+      popupHoverEl = pw;
+      pw.addEventListener('mouseenter', function(){ clearTimeout(leaveTimer); });
+      pw.addEventListener('mouseleave', function(){
+        var inner2 = markerEl && markerEl.querySelector('.map-marker');
+        if (!inner2 || !inner2.matches(':hover')) scheduleClose();
+      });
+    }
     function openPopup() {
       clearTimeout(leaveTimer);
       if (markerEl) markerEl.querySelector('.map-marker').classList.add('hovered');
-      marker.bindPopup(popup).openPopup();
-      // Attach leave handler to popup once it opens
-      setTimeout(function(){
-        var pw = marker.getPopup() && marker.getPopup().getElement();
-        if (pw && !usingTouch && !popupHoverBound) {
-          popupHoverBound = true;
-          pw.addEventListener('mouseenter', function(){ clearTimeout(leaveTimer); });
-          pw.addEventListener('mouseleave', function(){
-            var inner2 = markerEl && markerEl.querySelector('.map-marker');
-            if (!inner2 || !inner2.matches(':hover')) scheduleClose();
-          });
-        }
-      }, 20);
+      if (!isPopupOpen()) marker.openPopup();
+      bindPopupHoverOnce();
     }
     function closePopup() {
       clearTimeout(leaveTimer);
@@ -847,17 +844,18 @@
       if (isPopupOpen()) marker.closePopup();
     }
     function scheduleClose() {
-      if (pinnedOpen) return;
       leaveTimer = setTimeout(function(){
-        if (pinnedOpen) return;
         var pw = marker.getPopup() && marker.getPopup().getElement();
         if (pw && pw.matches(':hover')) return;
         closePopup();
-      }, 100);
+      }, 120);
     }
 
+    marker.on('popupopen', function(){
+      if (markerEl) markerEl.querySelector('.map-marker').classList.add('hovered');
+      bindPopupHoverOnce();
+    });
     marker.on('popupclose', function(){
-      pinnedOpen = false;
       if (markerEl) markerEl.querySelector('.map-marker').classList.remove('hovered');
     });
 
