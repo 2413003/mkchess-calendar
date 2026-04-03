@@ -363,11 +363,9 @@
   var pickerYear = viewYear, pickerOpen = false;
   var calWrap = document.getElementById('cal-wrap');
 
-  // Track whether the user is on a touch device
   var usingTouch = false;
   window.addEventListener('touchstart', function(){ usingTouch = true; }, { passive: true, once: true });
 
-  // Always size based on 6 rows so the calendar never shifts between months
   function setSquareWidth() {
     var overhead = 100;
     var gridHeight = window.innerHeight - overhead;
@@ -473,7 +471,7 @@
   function scheduledHide(){ hideTimer=setTimeout(hideTip,120); }
   function hideTip(){ tip.classList.remove('visible'); tipVisible = false; }
 
-  // On touch: dismiss tooltip when tapping outside it
+  // Dismiss tooltip when tapping outside it or the tooltip itself
   document.addEventListener('touchstart', function(e){
     if (tipVisible && !tip.contains(e.target)) { hideTip(); }
   }, { passive: true });
@@ -499,7 +497,6 @@
     var totalCells  = Math.ceil(total/7)*7;
     var cellIndex   = 0;
 
-    // Always use 6 rows for sizing — never shifts between months
     setSquareWidth();
 
     function addCell(d, otherMonth, isToday, evList, dateStr) {
@@ -528,9 +525,12 @@
           chip.addEventListener('mouseenter', function(){ if (!usingTouch) showTip(chip, ev, dateStr); });
           chip.addEventListener('mouseleave', function(){ if (!usingTouch) scheduledHide(); });
 
-          // Touch: tap to show tooltip, never navigate
+          // Touch: tap to toggle tooltip.
+          // stopPropagation prevents the document touchstart dismissal listener
+          // from immediately closing the tooltip we just opened.
           chip.addEventListener('touchstart', function(e){
             e.preventDefault();
+            e.stopPropagation();
             if (tipVisible) {
               hideTip();
             } else {
