@@ -254,24 +254,28 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 7px;
+    justify-content: center;
     background: rgba(255,255,255,0.96);
     border: 1px solid rgba(17, 24, 39, 0.14);
     border-radius: 999px;
-    padding: 8px 13px 8px 10px;
-    font-family: 'Sora', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: #111827;
+    width: 44px;
+    height: 44px;
     cursor: pointer;
     box-shadow: 0 9px 24px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(15, 23, 42, 0.12);
     backdrop-filter: blur(5px);
     transform-origin: center bottom;
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s, color 0.2s;
-    white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
     user-select: none;
     animation: marker-rise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     animation-delay: var(--marker-delay, 0ms);
+  }
+  .map-marker .mk-logo {
+    width: 27px;
+    height: 27px;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.18));
+    pointer-events: none;
   }
   .map-marker::after {
     content: '';
@@ -291,20 +295,12 @@
     box-shadow: 0 16px 28px rgba(15, 23, 42, 0.28), 0 4px 10px rgba(15, 23, 42, 0.18);
     border-color: rgba(17, 24, 39, 0.22);
   }
-  .map-marker.hovered { background: #111827; color: #fff; border-color: #111827; }
+  .map-marker.hovered { background: #fff; border-color: rgba(17, 24, 39, 0.22); }
   .map-marker.hovered::after {
-    background: #111827;
-    border-right-color: #111827;
-    border-bottom-color: #111827;
+    background: rgba(255,255,255,0.96);
+    border-right-color: rgba(17, 24, 39, 0.22);
+    border-bottom-color: rgba(17, 24, 39, 0.22);
   }
-  .map-marker .mk-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.55);
-  }
-  .map-marker.hovered .mk-dot { box-shadow: 0 0 0 3px rgba(255,255,255,0.18); }
   @keyframes marker-rise {
     0% { opacity: 0; transform: translateY(7px) scale(0.9); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -741,13 +737,13 @@
     var session  = SESSIONS[venue.key];
     var nextDate = getNextDate(venue.key);
     var timeStr  = nextDate ? (nextDate + ' | ' + session.time) : session.time;
-    var markerWidth  = Math.max(90, Math.round((session.label.length * 7.2) + 40));
-    var markerHeight = 39;
+    var markerWidth  = 44;
+    var markerHeight = 50;
 
-    // Custom pill marker via DivIcon
+    // Custom logo marker via DivIcon
     var icon = L.divIcon({
       className: 'map-marker-wrap',
-      html: '<div class="map-marker" style="--marker-delay:' + (idx * 70) + 'ms"><span class="mk-dot" style="background:' + session.dot + '"></span>' + session.label + '</div>',
+      html: '<div class="map-marker" style="--marker-delay:' + (idx * 70) + 'ms"><img class="mk-logo" src="logo.svg" alt="MK Chess" loading="lazy" onerror="this.onerror=null;this.src=\\'logo.png\\';"></div>',
       iconSize:   [markerWidth, markerHeight],
       iconAnchor: [Math.round(markerWidth / 2), markerHeight],
       popupAnchor:[0, -12]
