@@ -234,13 +234,14 @@
 
   /* Custom map markers */
   .map-marker-wrap {
-    width: 1px !important;
-    height: 1px !important;
     border: none !important;
     background: transparent !important;
-    overflow: visible !important;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
   }
   .map-marker {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 7px;
@@ -255,8 +256,7 @@
     cursor: pointer;
     box-shadow: 0 9px 24px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(15, 23, 42, 0.12);
     backdrop-filter: blur(5px);
-    transform: translate(-50%, -100%);
-    transform-origin: center;
+    transform-origin: center bottom;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s, color 0.2s;
     white-space: nowrap;
     user-select: none;
@@ -264,7 +264,7 @@
     animation-delay: var(--marker-delay, 0ms);
   }
   .map-marker:hover, .map-marker.hovered {
-    transform: translate(-50%, -100%) scale(1.07);
+    transform: translateY(-1px) scale(1.06);
     box-shadow: 0 16px 28px rgba(15, 23, 42, 0.28), 0 4px 10px rgba(15, 23, 42, 0.18);
     border-color: rgba(17, 24, 39, 0.22);
   }
@@ -278,8 +278,8 @@
   }
   .map-marker.hovered .mk-dot { box-shadow: 0 0 0 3px rgba(255,255,255,0.18); }
   @keyframes marker-rise {
-    0% { opacity: 0; transform: translate(-50%, -90%) scale(0.88); }
-    100% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+    0% { opacity: 0; transform: translateY(7px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   /* Leaflet overrides */
@@ -704,14 +704,16 @@
     var session  = SESSIONS[venue.key];
     var nextDate = getNextDate(venue.key);
     var timeStr  = nextDate ? (nextDate + ' | ' + session.time) : session.time;
+    var markerWidth  = Math.max(90, Math.round((session.label.length * 7.2) + 40));
+    var markerHeight = 34;
 
     // Custom pill marker via DivIcon
     var icon = L.divIcon({
       className: 'map-marker-wrap',
       html: '<div class="map-marker" style="--marker-delay:' + (idx * 70) + 'ms"><span class="mk-dot" style="background:' + session.dot + '"></span>' + session.label + '</div>',
-      iconSize:   [1, 1],
-      iconAnchor: [0, 0],
-      popupAnchor:[0, -18]
+      iconSize:   [markerWidth, markerHeight],
+      iconAnchor: [Math.round(markerWidth / 2), markerHeight],
+      popupAnchor:[0, -12]
     });
 
     var marker = L.marker([venue.lat, venue.lng], { icon: icon }).addTo(mapInstance);
@@ -739,7 +741,7 @@
         '<a class="map-popup-link" href="' + session.url + '" target="_parent">View session -></a>' +
       '</div>';
 
-    var popup = L.popup({ closeButton: false, offset: [0, -18], autoPan: false }).setContent(popupHTML);
+    var popup = L.popup({ closeButton: false, offset: [0, -18], autoPan: true, keepInView: true }).setContent(popupHTML);
 
     var popupOpen = false;
     var leaveTimer = null;
@@ -750,6 +752,12 @@
       if (!markerEl) return;
       var inner = markerEl.querySelector('.map-marker');
 
+      inner.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if (popupOpen) { closePopup(); } else { openPopup(); }
+      });
+
       if (!usingTouch) {
         inner.addEventListener('mouseenter', function(){ openPopup(); });
         inner.addEventListener('mouseleave', function(){ scheduleClose(); });
@@ -759,6 +767,10 @@
           if (popupOpen) { closePopup(); } else { openPopup(); }
         }, { passive: false });
       }
+    });
+
+    marker.on('click', function(){
+      if (popupOpen) { closePopup(); } else { openPopup(); }
     });
 
     function openPopup() {
