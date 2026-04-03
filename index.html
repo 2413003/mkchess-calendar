@@ -32,6 +32,16 @@
     margin-bottom: 10px;
     flex-shrink: 0;
   }
+  .cal-wrap.map-mode #btn-today,
+  .cal-wrap.map-mode #btn-prev,
+  .cal-wrap.map-mode #btn-next,
+  .cal-wrap.map-mode #cal-title-btn {
+    display: none;
+  }
+  .cal-wrap.map-mode #month-picker { display: none !important; }
+  .cal-wrap.map-mode .cal-header { justify-content: flex-end; }
+  .cal-wrap.map-mode .view-toggle { margin-left: 0; }
+
   .today-btn {
     background: none;
     border: 1px solid #dadce0;
@@ -659,6 +669,7 @@
   vtCalBtn.addEventListener('click', function(){
     if (currentView === 'calendar') return;
     currentView = 'calendar';
+    calWrap.classList.remove('map-mode');
     vtCalBtn.classList.add('active'); vtMapBtn.classList.remove('active');
     calendarViewEl.style.display = 'contents';
     mapViewEl.style.display = 'none';
@@ -668,6 +679,7 @@
   vtMapBtn.addEventListener('click', function(){
     if (currentView === 'map') return;
     currentView = 'map';
+    calWrap.classList.add('map-mode');
     vtMapBtn.classList.add('active'); vtCalBtn.classList.remove('active');
     calendarViewEl.style.display = 'none';
     mapViewEl.style.display = 'block';
