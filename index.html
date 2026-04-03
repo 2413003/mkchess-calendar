@@ -225,17 +225,18 @@
     transform: translateY(0) scale(1);
     pointer-events: auto;
   }
+  .tt-img-link {
+    display: block;
+    line-height: 0;
+    overflow: hidden;
+  }
+  .tt-img-link:hover .tt-img { opacity: 0.88; }
   .tt-img {
     width: 100%;
     height: 140px;
     object-fit: cover;
     display: block;
-  }
-  .tt-img-placeholder {
-    width: 100%;
-    height: 140px;
-    background: #f1f3f4;
-    display: block;
+    transition: opacity 0.15s;
   }
   .tt-body { padding: 14px 16px 16px; }
   .tt-header {
@@ -311,7 +312,9 @@
 </div>
 
 <div class="tooltip" id="tooltip">
-  <img class="tt-img" id="tt-img" src="" alt="">
+  <a class="tt-img-link" id="tt-img-link" href="#" target="_parent">
+    <img class="tt-img" id="tt-img" src="" alt="">
+  </a>
   <div class="tt-body">
     <div class="tt-header">
       <div class="tt-title-wrap">
@@ -414,6 +417,7 @@
 
   // ── Tooltip ──
   var tip       = document.getElementById('tooltip');
+  var ttImgLink = document.getElementById('tt-img-link');
   var ttImg     = document.getElementById('tt-img');
   var ttDot     = document.getElementById('tt-dot');
   var ttTitle   = document.getElementById('tt-title');
@@ -429,6 +433,7 @@
     if (session.img) {
       ttImg.src = session.img;
       ttImg.style.display = 'block';
+      ttImgLink.href = session.url;
     } else {
       ttImg.style.display = 'none';
     }
