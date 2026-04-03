@@ -363,10 +363,15 @@
   var pickerYear = viewYear, pickerOpen = false;
   var calWrap = document.getElementById('cal-wrap');
 
-  function setSquareWidth(numRows) {
+  // Track whether the user is on a touch device
+  var usingTouch = false;
+  window.addEventListener('touchstart', function(){ usingTouch = true; }, { passive: true, once: true });
+
+  // Always size based on 6 rows so the calendar never shifts between months
+  function setSquareWidth() {
     var overhead = 100;
     var gridHeight = window.innerHeight - overhead;
-    var ideal = Math.round((gridHeight / numRows) * 7 + 20);
+    var ideal = Math.round((gridHeight / 6) * 7 + 20);
     calWrap.style.maxWidth = Math.min(window.innerWidth, ideal) + 'px';
   }
 
@@ -432,6 +437,7 @@
   var ttDesc    = document.getElementById('tt-desc');
   var ttLink    = document.getElementById('tt-link');
   var hideTimer = null;
+  var tipVisible = false;
 
   function showTip(triggerEl, session, dateStr) {
     clearTimeout(hideTimer);
@@ -451,6 +457,7 @@
     ttLink.href             = session.url;
     placeTip(triggerEl);
     tip.classList.add('visible');
+    tipVisible = true;
   }
   function placeTip(el) {
     var r=el.getBoundingClientRect();
@@ -464,7 +471,12 @@
     tip.style.left=left+'px'; tip.style.top=top+'px';
   }
   function scheduledHide(){ hideTimer=setTimeout(hideTip,120); }
-  function hideTip(){ tip.classList.remove('visible'); }
+  function hideTip(){ tip.classList.remove('visible'); tipVisible = false; }
+
+  // On touch: dismiss tooltip when tapping outside it
+  document.addEventListener('touchstart', function(e){
+    if (tipVisible && !tip.contains(e.target)) { hideTip(); }
+  }, { passive: true });
 
   tip.addEventListener('mouseenter', function(){ clearTimeout(hideTimer); });
   tip.addEventListener('mouseleave', scheduledHide);
@@ -485,10 +497,10 @@
     var prevDays    = new Date(viewYear, viewMonth, 0).getDate();
     var total       = offset + daysInMonth;
     var totalCells  = Math.ceil(total/7)*7;
-    var numRows     = totalCells/7;
     var cellIndex   = 0;
 
-    setSquareWidth(numRows);
+    // Always use 6 rows for sizing — never shifts between months
+    setSquareWidth();
 
     function addCell(d, otherMonth, isToday, evList, dateStr) {
       cellIndex++;
@@ -511,8 +523,21 @@
           chip.textContent      = ev.label;
           chip.style.background = ev.bg;
           chip.style.color      = ev.color;
-          chip.addEventListener('mouseenter', function(){ showTip(chip, ev, dateStr); });
-          chip.addEventListener('mouseleave', scheduledHide);
+
+          // Desktop: hover to show/hide
+          chip.addEventListener('mouseenter', function(){ if (!usingTouch) showTip(chip, ev, dateStr); });
+          chip.addEventListener('mouseleave', function(){ if (!usingTouch) scheduledHide(); });
+
+          // Touch: tap to show tooltip, never navigate
+          chip.addEventListener('touchstart', function(e){
+            e.preventDefault();
+            if (tipVisible) {
+              hideTip();
+            } else {
+              showTip(chip, ev, dateStr);
+            }
+          }, { passive: false });
+
           cell.appendChild(chip);
         });
       }
@@ -531,13 +556,7 @@
     for (var i=1; i<=totalCells-total; i++) addCell(i, true, false, null, '');
   }
 
-  window.addEventListener('resize', function(){
-    var firstDay    = new Date(viewYear, viewMonth, 1).getDay();
-    var offset      = (firstDay===0) ? 6 : firstDay-1;
-    var daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
-    var total       = offset + daysInMonth;
-    setSquareWidth(Math.ceil(total/7));
-  });
+  window.addEventListener('resize', function(){ setSquareWidth(); });
 
   document.getElementById('btn-prev').addEventListener('click',  function(){ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} hideTip(); closePicker(); render(); });
   document.getElementById('btn-next').addEventListener('click',  function(){ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} hideTip(); closePicker(); render(); });
