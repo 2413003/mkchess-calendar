@@ -312,8 +312,11 @@
     { key:'learn',     text:'Last Fri — Unity Place'           },
     { key:'bletchley', text:'1st Wed — Bletchley'              },
     { key:'badminton', text:'2nd Thu — Natl Badminton Ctr'     },
-    { key:'sunday',    text:'Every Sun — Willen Lake'          }
+    { key:'sunday',    text:'Every Sun — Willen Lake (from 19 Apr)' }
   ];
+
+  // Sunday sessions start from 19 April 2025
+  var SUNDAY_START = new Date(2025, 3, 19); // month is 0-indexed
 
   var now = new Date();
   var viewYear = now.getFullYear(), viewMonth = now.getMonth();
@@ -321,7 +324,15 @@
   function lastFriday(y,m)    { var d=new Date(y,m+1,0); while(d.getDay()!==5)d.setDate(d.getDate()-1); return d.getDate(); }
   function firstWednesday(y,m){ var d=new Date(y,m,1);   while(d.getDay()!==3)d.setDate(d.getDate()+1); return d.getDate(); }
   function secondThursday(y,m){ var d=new Date(y,m,1);var c=0;while(c<2){if(d.getDay()===4)c++;if(c<2)d.setDate(d.getDate()+1);}return d.getDate(); }
-  function allSundays(y,m)    { var s=[],d=new Date(y,m,1);while(d.getDay()!==0)d.setDate(d.getDate()+1);while(d.getMonth()===m){s.push(d.getDate());d.setDate(d.getDate()+7);}return s; }
+  function allSundays(y,m) {
+    var s=[],d=new Date(y,m,1);
+    while(d.getDay()!==0) d.setDate(d.getDate()+1);
+    while(d.getMonth()===m){
+      if(d >= SUNDAY_START) s.push(d.getDate());
+      d.setDate(d.getDate()+7);
+    }
+    return s;
+  }
 
   function getEvents(y,m){
     var ev={};
