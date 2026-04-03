@@ -18,6 +18,8 @@
 
   .cal-wrap {
     height: 100%;
+    max-width: min(100%, calc(100vh * 1.1));
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     padding: 10px;
@@ -156,18 +158,9 @@
     text-align: center;
   }
   .mp-month:hover { background: #f1f3f4; }
-  .mp-month.active {
-    background: #1a73e8;
-    color: #fff;
-    font-weight: 600;
-  }
-  .mp-month.current-month {
-    color: #1a73e8;
-    font-weight: 600;
-  }
-  .mp-month.active.current-month {
-    color: #fff;
-  }
+  .mp-month.active { background: #1a73e8; color: #fff; font-weight: 600; }
+  .mp-month.current-month { color: #1a73e8; font-weight: 600; }
+  .mp-month.active.current-month { color: #fff; }
 
   /* Day headers */
   .day-headers {
@@ -321,7 +314,6 @@
       <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
 
-    <!-- Month picker -->
     <div class="month-picker" id="month-picker">
       <div class="mp-header">
         <button class="mp-nav" id="mp-prev">
@@ -371,9 +363,9 @@
 
 <script>
 (function(){
-  var MONTHS      = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var MONTHS_SHORT= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var DAYS_SHORT  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var MONTHS       = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYS_SHORT   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var SESSIONS = {
     learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 – 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place' },
@@ -385,10 +377,8 @@
   var SUNDAY_START = new Date(2026, 3, 19);
   var now = new Date();
   var viewYear = now.getFullYear(), viewMonth = now.getMonth();
-  var pickerYear = viewYear;
-  var pickerOpen = false;
+  var pickerYear = viewYear, pickerOpen = false;
 
-  // ── Event logic ──
   function lastFriday(y,m)    { var d=new Date(y,m+1,0); while(d.getDay()!==5)d.setDate(d.getDate()-1); return d.getDate(); }
   function firstWednesday(y,m){ var d=new Date(y,m,1); while(d.getDay()!==3)d.setDate(d.getDate()+1); return d.getDate(); }
   function secondThursday(y,m){ var d=new Date(y,m,1);var c=0;while(c<2){if(d.getDay()===4)c++;if(c<2)d.setDate(d.getDate()+1);}return d.getDate(); }
@@ -408,10 +398,10 @@
   }
 
   // ── Month picker ──
-  var pickerEl   = document.getElementById('month-picker');
-  var titleBtn   = document.getElementById('cal-title-btn');
-  var mpYearEl   = document.getElementById('mp-year');
-  var mpGrid     = document.getElementById('mp-grid');
+  var pickerEl = document.getElementById('month-picker');
+  var titleBtn = document.getElementById('cal-title-btn');
+  var mpYearEl = document.getElementById('mp-year');
+  var mpGrid   = document.getElementById('mp-grid');
 
   function renderPicker() {
     mpYearEl.textContent = pickerYear;
@@ -421,42 +411,21 @@
       var btn = document.createElement('button');
       btn.className = 'mp-month';
       btn.textContent = name;
-      if (i === viewMonth && pickerYear === viewYear)    btn.classList.add('active');
-      if (i === todayMonth && pickerYear === todayYear)  btn.classList.add('current-month');
+      if (i === viewMonth && pickerYear === viewYear)   btn.classList.add('active');
+      if (i === todayMonth && pickerYear === todayYear) btn.classList.add('current-month');
       btn.addEventListener('click', function(){
-        viewMonth = i;
-        viewYear  = pickerYear;
-        closePicker();
-        hideTip();
-        render();
+        viewMonth = i; viewYear = pickerYear;
+        closePicker(); hideTip(); render();
       });
       mpGrid.appendChild(btn);
     });
   }
+  function openPicker()  { pickerYear=viewYear; pickerOpen=true;  titleBtn.classList.add('open');    renderPicker(); pickerEl.classList.add('open');    }
+  function closePicker() {                      pickerOpen=false; titleBtn.classList.remove('open'); pickerEl.classList.remove('open'); }
 
-  function openPicker() {
-    pickerYear = viewYear;
-    pickerOpen = true;
-    titleBtn.classList.add('open');
-    renderPicker();
-    pickerEl.classList.add('open');
-  }
-  function closePicker() {
-    pickerOpen = false;
-    titleBtn.classList.remove('open');
-    pickerEl.classList.remove('open');
-  }
-
-  titleBtn.addEventListener('click', function(e){
-    e.stopPropagation();
-    pickerOpen ? closePicker() : openPicker();
-  });
-  document.getElementById('mp-prev').addEventListener('click', function(e){
-    e.stopPropagation(); pickerYear--; renderPicker();
-  });
-  document.getElementById('mp-next').addEventListener('click', function(e){
-    e.stopPropagation(); pickerYear++; renderPicker();
-  });
+  titleBtn.addEventListener('click', function(e){ e.stopPropagation(); pickerOpen ? closePicker() : openPicker(); });
+  document.getElementById('mp-prev').addEventListener('click', function(e){ e.stopPropagation(); pickerYear--; renderPicker(); });
+  document.getElementById('mp-next').addEventListener('click', function(e){ e.stopPropagation(); pickerYear++; renderPicker(); });
   document.addEventListener('click', function(){ if(pickerOpen) closePicker(); });
   pickerEl.addEventListener('click', function(e){ e.stopPropagation(); });
 
@@ -500,7 +469,7 @@
   tip.addEventListener('mouseleave', scheduledHide);
   document.getElementById('tt-close').addEventListener('click', hideTip);
 
-  // ── Main calendar render ──
+  // ── Render ──
   function render() {
     var today  = new Date(); today.setHours(0,0,0,0);
     var events = getEvents(viewYear, viewMonth);
