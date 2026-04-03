@@ -199,7 +199,7 @@
     flex: 1; border-radius: 12px; overflow: hidden;
     min-height: 0; position: relative; border: 1px solid #e0e0e0;
   }
-  #mapbox-map { width: 100%; height: 100%; }
+  #leaflet-map { width: 100%; height: 100%; }
 
   /* Custom map markers */
   .map-marker {
@@ -217,15 +217,20 @@
   .map-marker.hovered { background: #1f1f1f; color: #fff; border-color: #1f1f1f; }
   .map-marker .mk-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
-  /* Mapbox popup */
-  .mapboxgl-popup { max-width: none !important; }
-  .mapboxgl-popup-content {
+  /* Leaflet overrides */
+  .leaflet-popup-content-wrapper {
     padding: 0 !important; border-radius: 14px !important;
     box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 8px 28px rgba(0,0,0,0.14) !important;
-    overflow: hidden; width: 260px; font-family: 'Sora', sans-serif;
+    overflow: hidden; width: 260px; font-family: 'Sora', sans-serif; border: none !important;
   }
-  .mapboxgl-popup-tip { display: none !important; }
-  .mapboxgl-popup-close-button { display: none !important; }
+  .leaflet-popup-content { margin: 0 !important; width: 260px !important; line-height: 1; }
+  .leaflet-popup-tip-container { display: none !important; }
+  .leaflet-popup-close-button { display: none !important; }
+  .leaflet-container { font-family: 'Sora', sans-serif; }
+  .leaflet-control-zoom { border: none !important; box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important; }
+  .leaflet-control-zoom a { font-family: sans-serif; color: #3c4043 !important; border: none !important; border-bottom: 1px solid #eee !important; }
+  .leaflet-control-zoom a:last-child { border-bottom: none !important; }
+  .leaflet-control-zoom a:hover { background: #f1f3f4 !important; }
 
   .map-popup-img { width: 100%; height: 130px; object-fit: cover; display: block; }
   .map-popup-body { padding: 13px 15px 15px; }
@@ -336,7 +341,7 @@
 
   <!-- Map view (hidden by default) -->
   <div id="map-view" style="display:none">
-    <div id="mapbox-map"></div>
+    <div id="leaflet-map"></div>
   </div>
 </div>
 
@@ -505,21 +510,21 @@
     requestAnimationFrame(function(){ requestAnimationFrame(initMap); });
   });
 
-  // ── Map ──
-  var MAPBOX_VERSION = '2.15.0';
+  // ── Map (Leaflet + OpenStreetMap) ──
+  var LEAFLET_VERSION = '1.9.4';
 
   function initMap() {
-    if (mapInstance) { mapInstance.resize(); return; }
-    if (typeof mapboxgl !== 'undefined') { _createMap(); return; }
+    if (mapInstance) { mapInstance.invalidateSize(); return; }
+    if (typeof L !== 'undefined') { _createMap(); return; }
     var css = document.createElement('link');
     css.rel = 'stylesheet';
-    css.href = 'https://api.mapbox.com/mapbox-gl-js/v' + MAPBOX_VERSION + '/mapbox-gl.css';
+    css.href = 'https://unpkg.com/leaflet@' + LEAFLET_VERSION + '/dist/leaflet.css';
     document.head.appendChild(css);
     var script = document.createElement('script');
-    script.src = 'https://api.mapbox.com/mapbox-gl-js/v' + MAPBOX_VERSION + '/mapbox-gl.js';
+    script.src = 'https://unpkg.com/leaflet@' + LEAFLET_VERSION + '/dist/leaflet.js';
     script.onload  = _createMap;
     script.onerror = function() {
-      document.getElementById('mapbox-map').innerHTML =
+      document.getElementById('leaflet-map').innerHTML =
         '<div style="display:flex;align-items:center;justify-content:center;height:100%;' +
         'color:#888;font-family:Sora,sans-serif;font-size:13px;text-align:center;padding:24px;">' +
         'Map could not load — please check your connection.</div>';
@@ -528,34 +533,35 @@
   }
 
   function _createMap() {
-    mapboxgl.accessToken = 'pk.eyJ1IjoibWtjaGVzcyIsImEiOiJjbWt5YjM0ejM0ejMwNmt6M2RzNm9sZmdoZGM4In0.FBGsSGKuCtYzLoDNbZx51Q'; // public token — safe in client-side code
-    mapInstance = new mapboxgl.Map({
-      container: 'mapbox-map',
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [-0.765, 52.034],
-      zoom: 11.3,
-      attributionControl: false
-    });
-    mapInstance.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
-    mapInstance.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
-    mapInstance.on('load', function(){
-      VENUES.forEach(function(venue){ addVenueMarker(venue); });
-    });
+    mapInstance = L.map('leaflet-map', { zoomControl: false })
+      .setView([52.034, -0.765], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_parent">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(mapInstance);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+
+    VENUES.forEach(function(venue){ addVenueMarker(venue); });
   }
 
   function addVenueMarker(venue) {
     var session  = SESSIONS[venue.key];
     var nextDate = getNextDate(venue.key);
+    var timeStr  = nextDate ? (nextDate + ' · ' + session.time) : session.time;
 
-    // Marker pill element
-    var el = document.createElement('div');
-    el.className = 'map-marker';
-    el.innerHTML =
-      '<span class="mk-dot" style="background:' + session.dot + '"></span>' +
-      session.label;
+    // Custom pill marker via DivIcon
+    var icon = L.divIcon({
+      className: '',
+      html: '<div class="map-marker"><span class="mk-dot" style="background:' + session.dot + '"></span>' + session.label + '</div>',
+      iconSize:   [1, 1],
+      iconAnchor: [0, 0],
+      popupAnchor:[0, 0]
+    });
 
-    // Popup HTML
-    var timeStr = nextDate ? (nextDate + ' · ' + session.time) : session.time;
+    var marker = L.marker([venue.lat, venue.lng], { icon: icon }).addTo(mapInstance);
+
     var popupHTML =
       '<img class="map-popup-img" src="' + session.img + '" alt="">' +
       '<div class="map-popup-body">' +
@@ -578,58 +584,63 @@
         '<a class="map-popup-link" href="' + session.url + '" target="_parent">View session →</a>' +
       '</div>';
 
-    var popup = new mapboxgl.Popup({
-      offset: [0, -12],
-      closeButton: false,
-      closeOnClick: false,
-      anchor: 'bottom',
-      maxWidth: 'none'
-    }).setHTML(popupHTML);
-
-    new mapboxgl.Marker({ element: el, anchor: 'center' })
-      .setLngLat([venue.lng, venue.lat])
-      .addTo(mapInstance);
+    var popup = L.popup({ closeButton: false, offset: [130, 30], autoPan: false }).setContent(popupHTML);
 
     var popupOpen = false;
     var leaveTimer = null;
+    var markerEl;
+
+    marker.on('add', function(){
+      markerEl = marker.getElement();
+      if (!markerEl) return;
+      var inner = markerEl.querySelector('.map-marker');
+
+      if (!usingTouch) {
+        inner.addEventListener('mouseenter', function(){ openPopup(); });
+        inner.addEventListener('mouseleave', function(){ scheduleClose(); });
+      } else {
+        inner.addEventListener('touchstart', function(e){
+          e.preventDefault(); e.stopPropagation();
+          if (popupOpen) { closePopup(); } else { openPopup(); }
+        }, { passive: false });
+      }
+    });
 
     function openPopup() {
       clearTimeout(leaveTimer);
-      el.classList.add('hovered');
-      popup.setLngLat([venue.lng, venue.lat]).addTo(mapInstance);
+      if (markerEl) markerEl.querySelector('.map-marker').classList.add('hovered');
+      marker.bindPopup(popup).openPopup();
       popupOpen = true;
+      // Attach leave handler to popup once it opens
+      setTimeout(function(){
+        var pw = document.querySelector('.leaflet-popup');
+        if (pw && !usingTouch) {
+          pw.addEventListener('mouseenter', function(){ clearTimeout(leaveTimer); });
+          pw.addEventListener('mouseleave', function(){
+            var inner2 = markerEl && markerEl.querySelector('.map-marker');
+            if (!inner2 || !inner2.matches(':hover')) scheduleClose();
+          });
+        }
+      }, 20);
+    }
+    function closePopup() {
+      clearTimeout(leaveTimer);
+      if (markerEl) markerEl.querySelector('.map-marker').classList.remove('hovered');
+      marker.closePopup();
+      popupOpen = false;
     }
     function scheduleClose() {
       leaveTimer = setTimeout(function(){
-        var popupEl = popup.getElement();
-        if (popupEl && popupEl.matches(':hover')) return;
-        el.classList.remove('hovered');
-        popup.remove();
-        popupOpen = false;
+        var pw = document.querySelector('.leaflet-popup');
+        if (pw && pw.matches(':hover')) return;
+        closePopup();
       }, 100);
     }
 
-    if (!usingTouch) {
-      el.addEventListener('mouseenter', openPopup);
-      el.addEventListener('mouseleave', scheduleClose);
-      popup.on('open', function(){
-        var popupEl = popup.getElement();
-        if (!popupEl) return;
-        popupEl.addEventListener('mouseenter', function(){ clearTimeout(leaveTimer); });
-        popupEl.addEventListener('mouseleave', function(){
-          if (!el.matches(':hover')) scheduleClose();
-        });
-      });
-    } else {
-      el.addEventListener('touchstart', function(e){
-        e.preventDefault(); e.stopPropagation();
-        if (popupOpen) {
-          el.classList.remove('hovered'); popup.remove(); popupOpen = false;
-        } else {
-          openPopup();
-        }
-      }, { passive: false });
-    }
+    marker.on('popupclose', function(){
+      popupOpen = false;
+      if (markerEl) markerEl.querySelector('.map-marker').classList.remove('hovered');
+    });
   }
 
   // ── Calendar tooltip ──
