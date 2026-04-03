@@ -24,7 +24,6 @@
     padding: 10px;
   }
 
-  /* Header */
   .cal-header {
     display: flex;
     align-items: center;
@@ -91,7 +90,6 @@
   }
   .cal-title-btn.open .caret { transform: rotate(180deg); }
 
-  /* Month picker popup */
   .month-picker {
     position: absolute;
     top: 52px;
@@ -112,48 +110,26 @@
     pointer-events: auto;
     transform: translateX(-50%) translateY(0) scale(1);
   }
-  .mp-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
+  .mp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .mp-year { font-size: 15px; font-weight: 600; color: #1f1f1f; }
   .mp-nav {
-    background: none;
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #444;
-    transition: background 0.15s;
+    background: none; border: none; width: 30px; height: 30px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #444; transition: background 0.15s;
   }
   .mp-nav:hover { background: #f1f3f4; }
   .mp-nav svg { width: 15px; height: 15px; }
   .mp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .mp-month {
-    background: none;
-    border: none;
-    font-family: 'Sora', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    color: #3c4043;
-    padding: 8px 4px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.12s, color 0.12s;
-    text-align: center;
+    background: none; border: none; font-family: 'Sora', sans-serif;
+    font-size: 13px; font-weight: 400; color: #3c4043; padding: 8px 4px;
+    border-radius: 8px; cursor: pointer; transition: background 0.12s, color 0.12s; text-align: center;
   }
   .mp-month:hover { background: #f1f3f4; }
   .mp-month.active { background: #1a73e8; color: #fff; font-weight: 600; }
   .mp-month.current-month { color: #1a73e8; font-weight: 600; }
   .mp-month.active.current-month { color: #fff; }
 
-  /* Day headers */
   .day-headers {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -170,7 +146,6 @@
     text-transform: uppercase;
   }
 
-  /* Grid */
   .cal-grid {
     flex: 1;
     display: grid;
@@ -196,7 +171,6 @@
   .cal-cell.other-month   { background: #fafafa; }
   .cal-cell:hover         { background: #f8f9fa; }
 
-  /* Date number */
   .date-num {
     width: 26px;
     height: 26px;
@@ -209,14 +183,9 @@
     color: #3c4043;
     margin: 0 auto 3px;
   }
-  .cal-cell.today .date-num {
-    background: #1a73e8;
-    color: #fff;
-    font-weight: 600;
-  }
+  .cal-cell.today .date-num { background: #1a73e8; color: #fff; font-weight: 600; }
   .cal-cell.other-month .date-num { color: #b0b0b0; }
 
-  /* Event chips */
   .event-chip {
     display: block;
     width: 100%;
@@ -242,29 +211,57 @@
     position: fixed;
     z-index: 9999;
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 8px 28px rgba(0,0,0,0.12);
-    padding: 16px;
-    width: 248px;
+    border-radius: 14px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 8px 28px rgba(0,0,0,0.14);
+    width: 260px;
     pointer-events: none;
     opacity: 0;
     transform: translateY(6px) scale(0.98);
     transition: opacity 0.15s, transform 0.15s;
+    overflow: hidden;
   }
   .tooltip.visible {
     opacity: 1;
     transform: translateY(0) scale(1);
     pointer-events: auto;
   }
-  .tt-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+  .tt-img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+  }
+  .tt-img-placeholder {
+    width: 100%;
+    height: 140px;
+    background: #f1f3f4;
+    display: block;
+  }
+  .tt-body { padding: 14px 16px 16px; }
+  .tt-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
   .tt-title-wrap { display: flex; align-items: center; gap: 8px; }
-  .tt-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; }
+  .tt-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
   .tt-title { font-size: 14px; font-weight: 600; color: #1f1f1f; line-height: 1.3; }
-  .tt-close { background: none; border: none; cursor: pointer; color: #888; font-size: 16px; line-height: 1; padding: 0 0 0 4px; flex-shrink: 0; }
+  .tt-close {
+    background: none; border: none; cursor: pointer;
+    color: #888; font-size: 16px; line-height: 1; padding: 0 0 0 4px; flex-shrink: 0;
+  }
   .tt-close:hover { color: #333; }
-  .tt-row { display: flex; align-items: flex-start; gap: 9px; font-size: 12.5px; color: #5f6368; margin-bottom: 7px; line-height: 1.45; }
-  .tt-row svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
-  .tt-link { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 500; color: #1a73e8; text-decoration: none; padding: 5px 12px; border-radius: 6px; background: #e8f0fe; transition: background 0.15s; }
+  .tt-row {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 12px; color: #5f6368; margin-bottom: 6px; line-height: 1.45;
+  }
+  .tt-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
+  .tt-link {
+    display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 500;
+    color: #1a73e8; text-decoration: none; padding: 5px 12px; border-radius: 6px;
+    background: #e8f0fe; transition: background 0.15s;
+  }
   .tt-link:hover { background: #d2e3fc; }
 
   @media (max-width: 420px) {
@@ -314,26 +311,29 @@
 </div>
 
 <div class="tooltip" id="tooltip">
-  <div class="tt-header">
-    <div class="tt-title-wrap">
-      <div class="tt-dot" id="tt-dot"></div>
-      <div class="tt-title" id="tt-title"></div>
+  <img class="tt-img" id="tt-img" src="" alt="">
+  <div class="tt-body">
+    <div class="tt-header">
+      <div class="tt-title-wrap">
+        <div class="tt-dot" id="tt-dot"></div>
+        <div class="tt-title" id="tt-title"></div>
+      </div>
+      <button class="tt-close" id="tt-close">✕</button>
     </div>
-    <button class="tt-close" id="tt-close">✕</button>
+    <div class="tt-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="tt-time"></span>
+    </div>
+    <div class="tt-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span id="tt-loc"></span>
+    </div>
+    <div class="tt-row" id="tt-desc-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span id="tt-desc"></span>
+    </div>
+    <a class="tt-link" id="tt-link" href="#" target="_parent">View session →</a>
   </div>
-  <div class="tt-row">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span id="tt-time"></span>
-  </div>
-  <div class="tt-row">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-    <span id="tt-loc"></span>
-  </div>
-  <div class="tt-row" id="tt-desc-row">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-    <span id="tt-desc"></span>
-  </div>
-  <a class="tt-link" id="tt-link" href="#" target="_parent">View session →</a>
 </div>
 
 <script>
@@ -343,26 +343,22 @@
   var DAYS_SHORT   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var SESSIONS = {
-    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 – 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place' },
-    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 – 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley'   },
-    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 – 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent'   },
-    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 – 11:30 AM',location:'Willen Lake Café, MK15 0DS',            desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake' }
+    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 – 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place', img:'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf' },
+    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 – 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
+    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 – 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
+    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 – 11:30 AM',location:'Willen Lake Café, MK15 0DS',            desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake', img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8' }
   };
 
   var SUNDAY_START = new Date(2026, 3, 19);
   var now = new Date();
   var viewYear = now.getFullYear(), viewMonth = now.getMonth();
   var pickerYear = viewYear, pickerOpen = false;
-
   var calWrap = document.getElementById('cal-wrap');
 
-  // Sets max-width so cells are close to square given the actual row count
   function setSquareWidth(numRows) {
-    // grid occupies viewport height minus header (~52px) + day labels (~28px) + padding (~20px)
     var overhead = 100;
     var gridHeight = window.innerHeight - overhead;
-    // for square cells: containerWidth / 7 = gridHeight / numRows
-    var ideal = Math.round((gridHeight / numRows) * 7 + 20); // +20 for padding
+    var ideal = Math.round((gridHeight / numRows) * 7 + 20);
     calWrap.style.maxWidth = Math.min(window.innerWidth, ideal) + 'px';
   }
 
@@ -418,6 +414,7 @@
 
   // ── Tooltip ──
   var tip       = document.getElementById('tooltip');
+  var ttImg     = document.getElementById('tt-img');
   var ttDot     = document.getElementById('tt-dot');
   var ttTitle   = document.getElementById('tt-title');
   var ttTime    = document.getElementById('tt-time');
@@ -429,6 +426,12 @@
 
   function showTip(triggerEl, session, dateStr) {
     clearTimeout(hideTimer);
+    if (session.img) {
+      ttImg.src = session.img;
+      ttImg.style.display = 'block';
+    } else {
+      ttImg.style.display = 'none';
+    }
     ttDot.style.background  = session.dot;
     ttTitle.textContent     = session.label;
     ttTime.textContent      = dateStr + ' · ' + session.time;
@@ -440,7 +443,8 @@
     tip.classList.add('visible');
   }
   function placeTip(el) {
-    var r=el.getBoundingClientRect(), tw=248, th=200;
+    var r=el.getBoundingClientRect();
+    var tw=260, th=320;
     var vw=window.innerWidth, vh=window.innerHeight;
     var left=r.right+10, top=r.top;
     if(left+tw>vw-8) left=r.left-tw-10;
@@ -460,7 +464,6 @@
   function render() {
     var today  = new Date(); today.setHours(0,0,0,0);
     var events = getEvents(viewYear, viewMonth);
-
     document.getElementById('cal-title-text').textContent = MONTHS[viewMonth] + ' ' + viewYear;
 
     var grid = document.getElementById('cal-grid');
@@ -472,10 +475,9 @@
     var prevDays    = new Date(viewYear, viewMonth, 0).getDate();
     var total       = offset + daysInMonth;
     var totalCells  = Math.ceil(total/7)*7;
-    var numRows     = totalCells / 7;
+    var numRows     = totalCells/7;
     var cellIndex   = 0;
 
-    // Set width so cells are square for this month's row count
     setSquareWidth(numRows);
 
     function addCell(d, otherMonth, isToday, evList, dateStr) {
@@ -519,14 +521,12 @@
     for (var i=1; i<=totalCells-total; i++) addCell(i, true, false, null, '');
   }
 
-  // Re-apply on window resize
   window.addEventListener('resize', function(){
     var firstDay    = new Date(viewYear, viewMonth, 1).getDay();
     var offset      = (firstDay===0) ? 6 : firstDay-1;
     var daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
     var total       = offset + daysInMonth;
-    var totalCells  = Math.ceil(total/7)*7;
-    setSquareWidth(totalCells/7);
+    setSquareWidth(Math.ceil(total/7));
   });
 
   document.getElementById('btn-prev').addEventListener('click',  function(){ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} hideTip(); closePicker(); render(); });
