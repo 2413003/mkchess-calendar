@@ -258,8 +258,8 @@
     background: rgba(255,255,255,0.96);
     border: 1px solid rgba(17, 24, 39, 0.14);
     border-radius: 999px;
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
     cursor: pointer;
     box-shadow: 0 9px 24px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(15, 23, 42, 0.12);
     backdrop-filter: blur(5px);
@@ -270,11 +270,12 @@
     animation-delay: var(--marker-delay, 0ms);
   }
   .map-marker .mk-logo {
-    width: 27px;
-    height: 27px;
-    object-fit: contain;
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    object-position: center;
     display: block;
-    filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.18));
+    image-rendering: auto;
     pointer-events: none;
   }
   .map-marker::after {
@@ -737,13 +738,13 @@
     var session  = SESSIONS[venue.key];
     var nextDate = getNextDate(venue.key);
     var timeStr  = nextDate ? (nextDate + ' | ' + session.time) : session.time;
-    var markerWidth  = 44;
-    var markerHeight = 50;
+    var markerWidth  = 50;
+    var markerHeight = 56;
 
     // Custom logo marker via DivIcon
     var icon = L.divIcon({
       className: 'map-marker-wrap',
-      html: '<div class="map-marker" style="--marker-delay:' + (idx * 70) + 'ms"><img class="mk-logo" src="logo.png" alt="MK Chess" loading="lazy"></div>',
+      html: '<div class="map-marker" style="--marker-delay:' + (idx * 70) + 'ms"><picture><source srcset="logo.svg" type="image/svg+xml"><img class="mk-logo" src="logo.png" alt="MK Chess" loading="lazy"></picture></div>',
       iconSize:   [markerWidth, markerHeight],
       iconAnchor: [Math.round(markerWidth / 2), markerHeight],
       popupAnchor:[0, -12]
