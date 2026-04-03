@@ -18,7 +18,6 @@
 
   .cal-wrap {
     height: 100%;
-    max-width: min(100%, calc(100vh * 1.1));
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -119,11 +118,7 @@
     justify-content: space-between;
     margin-bottom: 14px;
   }
-  .mp-year {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1f1f1f;
-  }
+  .mp-year { font-size: 15px; font-weight: 600; color: #1f1f1f; }
   .mp-nav {
     background: none;
     border: none;
@@ -139,11 +134,7 @@
   }
   .mp-nav:hover { background: #f1f3f4; }
   .mp-nav svg { width: 15px; height: 15px; }
-  .mp-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
+  .mp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .mp-month {
     background: none;
     border: none;
@@ -265,30 +256,15 @@
     transform: translateY(0) scale(1);
     pointer-events: auto;
   }
-  .tt-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
+  .tt-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
   .tt-title-wrap { display: flex; align-items: center; gap: 8px; }
   .tt-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; }
   .tt-title { font-size: 14px; font-weight: 600; color: #1f1f1f; line-height: 1.3; }
-  .tt-close {
-    background: none; border: none; cursor: pointer;
-    color: #888; font-size: 16px; line-height: 1; padding: 0 0 0 4px; flex-shrink: 0;
-  }
+  .tt-close { background: none; border: none; cursor: pointer; color: #888; font-size: 16px; line-height: 1; padding: 0 0 0 4px; flex-shrink: 0; }
   .tt-close:hover { color: #333; }
-  .tt-row {
-    display: flex; align-items: flex-start; gap: 9px;
-    font-size: 12.5px; color: #5f6368; margin-bottom: 7px; line-height: 1.45;
-  }
+  .tt-row { display: flex; align-items: flex-start; gap: 9px; font-size: 12.5px; color: #5f6368; margin-bottom: 7px; line-height: 1.45; }
   .tt-row svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
-  .tt-link {
-    display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 500;
-    color: #1a73e8; text-decoration: none; padding: 5px 12px; border-radius: 6px;
-    background: #e8f0fe; transition: background 0.15s;
-  }
+  .tt-link { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 500; color: #1a73e8; text-decoration: none; padding: 5px 12px; border-radius: 6px; background: #e8f0fe; transition: background 0.15s; }
   .tt-link:hover { background: #d2e3fc; }
 
   @media (max-width: 420px) {
@@ -300,7 +276,7 @@
 </style>
 </head>
 <body>
-<div class="cal-wrap">
+<div class="cal-wrap" id="cal-wrap">
   <div class="cal-header" style="position:relative;">
     <button class="today-btn" id="btn-today">Today</button>
     <button class="nav-btn" id="btn-prev">
@@ -337,7 +313,6 @@
   <div class="cal-grid" id="cal-grid"></div>
 </div>
 
-<!-- Tooltip -->
 <div class="tooltip" id="tooltip">
   <div class="tt-header">
     <div class="tt-title-wrap">
@@ -378,6 +353,18 @@
   var now = new Date();
   var viewYear = now.getFullYear(), viewMonth = now.getMonth();
   var pickerYear = viewYear, pickerOpen = false;
+
+  var calWrap = document.getElementById('cal-wrap');
+
+  // Sets max-width so cells are close to square given the actual row count
+  function setSquareWidth(numRows) {
+    // grid occupies viewport height minus header (~52px) + day labels (~28px) + padding (~20px)
+    var overhead = 100;
+    var gridHeight = window.innerHeight - overhead;
+    // for square cells: containerWidth / 7 = gridHeight / numRows
+    var ideal = Math.round((gridHeight / numRows) * 7 + 20); // +20 for padding
+    calWrap.style.maxWidth = Math.min(window.innerWidth, ideal) + 'px';
+  }
 
   function lastFriday(y,m)    { var d=new Date(y,m+1,0); while(d.getDay()!==5)d.setDate(d.getDate()-1); return d.getDate(); }
   function firstWednesday(y,m){ var d=new Date(y,m,1); while(d.getDay()!==3)d.setDate(d.getDate()+1); return d.getDate(); }
@@ -420,7 +407,7 @@
       mpGrid.appendChild(btn);
     });
   }
-  function openPicker()  { pickerYear=viewYear; pickerOpen=true;  titleBtn.classList.add('open');    renderPicker(); pickerEl.classList.add('open');    }
+  function openPicker()  { pickerYear=viewYear; pickerOpen=true;  titleBtn.classList.add('open');    renderPicker(); pickerEl.classList.add('open'); }
   function closePicker() {                      pickerOpen=false; titleBtn.classList.remove('open'); pickerEl.classList.remove('open'); }
 
   titleBtn.addEventListener('click', function(e){ e.stopPropagation(); pickerOpen ? closePicker() : openPicker(); });
@@ -485,7 +472,11 @@
     var prevDays    = new Date(viewYear, viewMonth, 0).getDate();
     var total       = offset + daysInMonth;
     var totalCells  = Math.ceil(total/7)*7;
+    var numRows     = totalCells / 7;
     var cellIndex   = 0;
+
+    // Set width so cells are square for this month's row count
+    setSquareWidth(numRows);
 
     function addCell(d, otherMonth, isToday, evList, dateStr) {
       cellIndex++;
@@ -527,6 +518,16 @@
     }
     for (var i=1; i<=totalCells-total; i++) addCell(i, true, false, null, '');
   }
+
+  // Re-apply on window resize
+  window.addEventListener('resize', function(){
+    var firstDay    = new Date(viewYear, viewMonth, 1).getDay();
+    var offset      = (firstDay===0) ? 6 : firstDay-1;
+    var daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+    var total       = offset + daysInMonth;
+    var totalCells  = Math.ceil(total/7)*7;
+    setSquareWidth(totalCells/7);
+  });
 
   document.getElementById('btn-prev').addEventListener('click',  function(){ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} hideTip(); closePicker(); render(); });
   document.getElementById('btn-next').addEventListener('click',  function(){ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} hideTip(); closePicker(); render(); });
