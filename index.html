@@ -775,11 +775,12 @@
         '<a class="map-popup-link" href="' + session.url + '" target="_parent">View session -></a>' +
       '</div>';
 
-    var popup = L.popup({ closeButton: false, offset: [0, -18], autoPan: true, keepInView: true }).setContent(popupHTML);
+    var popup = L.popup({ closeButton: false, offset: [0, -18], autoPan: true, keepInView: true, closeOnClick: false }).setContent(popupHTML);
 
     var leaveTimer = null;
     var markerEl;
     var popupHoverBound = false;
+    var pinnedOpen = false;
 
     marker.on('add', function(){
       markerEl = marker.getElement();
@@ -789,23 +790,34 @@
       inner.addEventListener('click', function(e){
         e.preventDefault();
         e.stopPropagation();
+        pinnedOpen = true;
         openPopup();
       });
 
       if (!usingTouch) {
-        inner.addEventListener('mouseenter', function(){ openPopup(); });
+        inner.addEventListener('mouseenter', function(){ if (!pinnedOpen) openPopup(); });
         inner.addEventListener('mouseleave', function(){ scheduleClose(); });
       } else {
         inner.addEventListener('touchstart', function(e){
           e.preventDefault();
           e.stopPropagation();
+          pinnedOpen = true;
           openPopup();
         }, { passive: false });
       }
     });
 
-    marker.on('click', function(){
+    marker.on('click', function(e){
+      if (e && e.originalEvent && typeof L !== 'undefined' && L.DomEvent) {
+        L.DomEvent.stopPropagation(e.originalEvent);
+      }
+      pinnedOpen = true;
       openPopup();
+    });
+
+    mapInstance.on('click', function(){
+      pinnedOpen = false;
+      closePopup();
     });
 
     function isPopupOpen() {
@@ -835,7 +847,9 @@
       if (isPopupOpen()) marker.closePopup();
     }
     function scheduleClose() {
+      if (pinnedOpen) return;
       leaveTimer = setTimeout(function(){
+        if (pinnedOpen) return;
         var pw = marker.getPopup() && marker.getPopup().getElement();
         if (pw && pw.matches(':hover')) return;
         closePopup();
@@ -843,6 +857,7 @@
     }
 
     marker.on('popupclose', function(){
+      pinnedOpen = false;
       if (markerEl) markerEl.querySelector('.map-marker').classList.remove('hovered');
     });
 
