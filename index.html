@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MK Chess Calendar</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -82,14 +83,41 @@
   }
   .cal-title-btn:hover { background: #f1f3f4; }
   .cal-title-btn .caret {
-    width: 20px;
-    height: 20px;
-    color: #5f6368;
-    flex-shrink: 0;
-    transition: transform 0.2s;
+    width: 20px; height: 20px; color: #5f6368; flex-shrink: 0; transition: transform 0.2s;
   }
   .cal-title-btn.open .caret { transform: rotate(180deg); }
 
+  /* View toggle */
+  .view-toggle {
+    margin-left: auto;
+    display: flex;
+    background: #f1f3f4;
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .vt-btn {
+    background: none;
+    border: none;
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #5f6368;
+    padding: 5px 13px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .vt-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .vt-btn.active { background: #fff; color: #1f1f1f; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+  .vt-btn:hover:not(.active) { color: #3c4043; }
+
+  /* Month picker */
   .month-picker {
     position: absolute;
     top: 52px;
@@ -105,11 +133,7 @@
     pointer-events: none;
     transition: opacity 0.18s, transform 0.18s;
   }
-  .month-picker.open {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
+  .month-picker.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0) scale(1); }
   .mp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .mp-year { font-size: 15px; font-weight: 600; color: #1f1f1f; }
   .mp-nav {
@@ -130,119 +154,108 @@
   .mp-month.current-month { color: #1a73e8; font-weight: 600; }
   .mp-month.active.current-month { color: #fff; }
 
+  /* Calendar */
   .day-headers {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    margin-bottom: 2px;
-    flex-shrink: 0;
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 2px; flex-shrink: 0;
   }
   .day-header {
-    text-align: center;
-    font-size: 11px;
-    font-weight: 500;
-    color: #70757a;
-    padding: 4px 0 6px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    text-align: center; font-size: 11px; font-weight: 500; color: #70757a;
+    padding: 4px 0 6px; letter-spacing: 0.5px; text-transform: uppercase;
   }
-
   .cal-grid {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-auto-rows: 1fr;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    overflow: hidden;
-    min-height: 0;
+    flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: 1fr;
+    border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; min-height: 0;
   }
   .cal-cell {
-    border-right: 1px solid #e0e0e0;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 4px;
-    position: relative;
-    cursor: default;
-    transition: background 0.1s;
-    overflow: hidden;
-    min-height: 0;
+    border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
+    padding: 4px; position: relative; cursor: default;
+    transition: background 0.1s; overflow: hidden; min-height: 0;
   }
   .cal-cell:nth-child(7n) { border-right: none; }
   .cal-cell.last-row      { border-bottom: none; }
   .cal-cell.other-month   { background: #fafafa; }
   .cal-cell:hover         { background: #f8f9fa; }
-
   .date-num {
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 400;
-    color: #3c4043;
-    margin: 0 auto 3px;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; font-size: 12px; font-weight: 400; color: #3c4043; margin: 0 auto 3px;
   }
   .cal-cell.today .date-num { background: #1a73e8; color: #fff; font-weight: 600; }
   .cal-cell.other-month .date-num { color: #b0b0b0; }
 
+  /* Neutral event chips */
   .event-chip {
-    display: block;
-    width: 100%;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 2px 5px;
-    border-radius: 4px;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 19px;
-    border: none;
-    text-align: left;
-    font-family: 'Sora', sans-serif;
-    cursor: pointer;
-    transition: filter 0.12s;
+    display: block; width: 100%; font-size: 13px; font-weight: 500;
+    padding: 2px 5px; border-radius: 4px; margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 19px;
+    border: none; text-align: left; font-family: 'Sora', sans-serif; cursor: pointer;
+    background: #f1f3f4; color: #3c4043;
+    transition: background 0.12s;
   }
-  .event-chip:hover { filter: brightness(0.92); }
+  .event-chip:hover { background: #e4e6e8; }
 
-  /* Tooltip */
+  /* Map view */
+  #map-view {
+    flex: 1; border-radius: 12px; overflow: hidden;
+    min-height: 0; position: relative; border: 1px solid #e0e0e0;
+  }
+  #mapbox-map { width: 100%; height: 100%; }
+
+  /* Custom map markers */
+  .map-marker {
+    display: flex; align-items: center; gap: 5px;
+    background: #fff; border: 1.5px solid #e0e0e0; border-radius: 20px;
+    padding: 5px 11px 5px 8px;
+    font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600; color: #1f1f1f;
+    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.13);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s, color 0.15s;
+    white-space: nowrap; user-select: none;
+  }
+  .map-marker:hover, .map-marker.hovered {
+    transform: scale(1.06); box-shadow: 0 4px 14px rgba(0,0,0,0.2); border-color: #aaa;
+  }
+  .map-marker.hovered { background: #1f1f1f; color: #fff; border-color: #1f1f1f; }
+  .map-marker .mk-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Mapbox popup */
+  .mapboxgl-popup { max-width: none !important; }
+  .mapboxgl-popup-content {
+    padding: 0 !important; border-radius: 14px !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 8px 28px rgba(0,0,0,0.14) !important;
+    overflow: hidden; width: 260px; font-family: 'Sora', sans-serif;
+  }
+  .mapboxgl-popup-tip { display: none !important; }
+  .mapboxgl-popup-close-button { display: none !important; }
+
+  .map-popup-img { width: 100%; height: 130px; object-fit: cover; display: block; }
+  .map-popup-body { padding: 13px 15px 15px; }
+  .map-popup-header { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .map-popup-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .map-popup-title { font-size: 14px; font-weight: 600; color: #1f1f1f; line-height: 1.3; }
+  .map-popup-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12px; color: #5f6368; margin-bottom: 5px; line-height: 1.45;
+  }
+  .map-popup-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
+  .map-popup-link {
+    display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 500;
+    color: #1a73e8; text-decoration: none; padding: 5px 12px; border-radius: 6px;
+    background: #e8f0fe; transition: background 0.15s;
+  }
+  .map-popup-link:hover { background: #d2e3fc; }
+
+  /* Calendar tooltip */
   .tooltip {
-    position: fixed;
-    z-index: 9999;
-    background: #fff;
-    border-radius: 14px;
+    position: fixed; z-index: 9999; background: #fff; border-radius: 14px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 8px 28px rgba(0,0,0,0.14);
-    width: 260px;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(6px) scale(0.98);
-    transition: opacity 0.15s, transform 0.15s;
-    overflow: hidden;
+    width: 260px; pointer-events: none; opacity: 0;
+    transform: translateY(6px) scale(0.98); transition: opacity 0.15s, transform 0.15s; overflow: hidden;
   }
-  .tooltip.visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-  }
-  .tt-img-link {
-    display: block;
-    line-height: 0;
-    overflow: hidden;
-  }
-  .tt-img {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
-    display: block;
-  }
+  .tooltip.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  .tt-img-link { display: block; line-height: 0; overflow: hidden; }
+  .tt-img { width: 100%; height: 140px; object-fit: cover; display: block; }
   .tt-body { padding: 14px 16px 16px; }
-  .tt-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
+  .tt-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
   .tt-title-wrap { display: flex; align-items: center; gap: 8px; }
   .tt-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
   .tt-title { font-size: 14px; font-weight: 600; color: #1f1f1f; line-height: 1.3; }
@@ -251,10 +264,7 @@
     color: #888; font-size: 16px; line-height: 1; padding: 0 0 0 4px; flex-shrink: 0;
   }
   .tt-close:hover { color: #333; }
-  .tt-row {
-    display: flex; align-items: flex-start; gap: 9px;
-    font-size: 12px; color: #5f6368; margin-bottom: 6px; line-height: 1.45;
-  }
+  .tt-row { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; color: #5f6368; margin-bottom: 6px; line-height: 1.45; }
   .tt-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
   .tt-link {
     display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 500;
@@ -266,15 +276,10 @@
   @media (max-width: 420px) {
     .cal-title-btn { font-size: 16px; }
     .date-num { width: 18px; height: 18px; font-size: 9px; }
-    .event-chip {
-      font-size: 11px;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: clip;
-      line-height: 1.3;
-      padding: 2px 4px;
-    }
+    .event-chip { font-size: 11px; white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; padding: 2px 4px; }
     .today-btn { padding: 5px 10px; font-size: 12px; }
+    .vt-btn { font-size: 11px; padding: 5px 9px; }
+    .vt-btn svg { display: none; }
   }
 </style>
 </head>
@@ -305,17 +310,37 @@
       </div>
       <div class="mp-grid" id="mp-grid"></div>
     </div>
+
+    <!-- View toggle -->
+    <div class="view-toggle">
+      <button class="vt-btn active" id="vt-calendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendar
+      </button>
+      <button class="vt-btn" id="vt-map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Map
+      </button>
+    </div>
   </div>
 
-  <div class="day-headers">
-    <div class="day-header">Mon</div><div class="day-header">Tue</div><div class="day-header">Wed</div>
-    <div class="day-header">Thu</div><div class="day-header">Fri</div><div class="day-header">Sat</div>
-    <div class="day-header">Sun</div>
+  <!-- Calendar view -->
+  <div id="calendar-view" style="display:contents">
+    <div class="day-headers">
+      <div class="day-header">Mon</div><div class="day-header">Tue</div><div class="day-header">Wed</div>
+      <div class="day-header">Thu</div><div class="day-header">Fri</div><div class="day-header">Sat</div>
+      <div class="day-header">Sun</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
   </div>
 
-  <div class="cal-grid" id="cal-grid"></div>
+  <!-- Map view (hidden by default) -->
+  <div id="map-view" style="display:none">
+    <div id="mapbox-map"></div>
+  </div>
 </div>
 
+<!-- Calendar tooltip -->
 <div class="tooltip" id="tooltip">
   <a class="tt-img-link" id="tt-img-link" href="#" target="_parent">
     <img class="tt-img" id="tt-img" src="" alt="">
@@ -357,11 +382,20 @@
     sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 – 11:30 AM',location:'Willen Lake Café, MK15 0DS',            desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake', img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8' }
   };
 
+  var VENUES = [
+    { key: 'learn',     lng: -0.7580, lat: 52.0403 },
+    { key: 'bletchley', lng: -0.7341, lat: 51.9985 },
+    { key: 'badminton', lng: -0.7914, lat: 52.0487 },
+    { key: 'sunday',    lng: -0.7116, lat: 52.0665 }
+  ];
+
   var SUNDAY_START = new Date(2026, 3, 19);
   var now = new Date();
   var viewYear = now.getFullYear(), viewMonth = now.getMonth();
   var pickerYear = viewYear, pickerOpen = false;
+  var currentView = 'calendar';
   var calWrap = document.getElementById('cal-wrap');
+  var mapInstance = null;
 
   var usingTouch = false;
   window.addEventListener('touchstart', function(){ usingTouch = true; }, { passive: true, once: true });
@@ -391,6 +425,30 @@
     return ev;
   }
 
+  // Find next upcoming session for a given key
+  function getNextDate(sessionKey) {
+    var y = now.getFullYear(), m = now.getMonth();
+    var today = new Date(); today.setHours(0,0,0,0);
+    for (var attempt = 0; attempt < 6; attempt++) {
+      var events = getEvents(y, m);
+      var days = Object.keys(events).map(Number).sort(function(a,b){return a-b;});
+      for (var i = 0; i < days.length; i++) {
+        var day = days[i];
+        var d = new Date(y, m, day); d.setHours(0,0,0,0);
+        if (d >= today) {
+          for (var j = 0; j < events[day].length; j++) {
+            if (events[day][j] === SESSIONS[sessionKey]) {
+              var dow = d.getDay(); var dowIdx = (dow===0)?6:dow-1;
+              return DAYS_SHORT[dowIdx] + ' ' + day + ' ' + MONTHS[m].slice(0,3);
+            }
+          }
+        }
+      }
+      m++; if (m > 11) { m = 0; y++; }
+    }
+    return '';
+  }
+
   // ── Month picker ──
   var pickerEl = document.getElementById('month-picker');
   var titleBtn = document.getElementById('cal-title-btn');
@@ -403,13 +461,11 @@
     var todayMonth = now.getMonth(), todayYear = now.getFullYear();
     MONTHS_SHORT.forEach(function(name, i){
       var btn = document.createElement('button');
-      btn.className = 'mp-month';
-      btn.textContent = name;
+      btn.className = 'mp-month'; btn.textContent = name;
       if (i === viewMonth && pickerYear === viewYear)   btn.classList.add('active');
       if (i === todayMonth && pickerYear === todayYear) btn.classList.add('current-month');
       btn.addEventListener('click', function(){
-        viewMonth = i; viewYear = pickerYear;
-        closePicker(); hideTip(); render();
+        viewMonth = i; viewYear = pickerYear; closePicker(); hideTip(); render();
       });
       mpGrid.appendChild(btn);
     });
@@ -423,7 +479,160 @@
   document.addEventListener('click', function(){ if(pickerOpen) closePicker(); });
   pickerEl.addEventListener('click', function(e){ e.stopPropagation(); });
 
-  // ── Tooltip ──
+  // ── View toggle ──
+  var calendarViewEl = document.getElementById('calendar-view');
+  var mapViewEl      = document.getElementById('map-view');
+  var vtCalBtn = document.getElementById('vt-calendar');
+  var vtMapBtn = document.getElementById('vt-map');
+
+  vtCalBtn.addEventListener('click', function(){
+    if (currentView === 'calendar') return;
+    currentView = 'calendar';
+    vtCalBtn.classList.add('active'); vtMapBtn.classList.remove('active');
+    calendarViewEl.style.display = 'contents';
+    mapViewEl.style.display = 'none';
+    render();
+  });
+
+  vtMapBtn.addEventListener('click', function(){
+    if (currentView === 'map') return;
+    currentView = 'map';
+    vtMapBtn.classList.add('active'); vtCalBtn.classList.remove('active');
+    calendarViewEl.style.display = 'none';
+    mapViewEl.style.display = 'block';
+    hideTip(); closePicker();
+    // Give DOM a tick to lay out before init
+    requestAnimationFrame(function(){ requestAnimationFrame(initMap); });
+  });
+
+  // ── Map ──
+  var MAPBOX_VERSION = '2.15.0';
+
+  function initMap() {
+    if (mapInstance) { mapInstance.resize(); return; }
+    if (typeof mapboxgl !== 'undefined') { _createMap(); return; }
+    var css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://api.mapbox.com/mapbox-gl-js/v' + MAPBOX_VERSION + '/mapbox-gl.css';
+    document.head.appendChild(css);
+    var script = document.createElement('script');
+    script.src = 'https://api.mapbox.com/mapbox-gl-js/v' + MAPBOX_VERSION + '/mapbox-gl.js';
+    script.onload  = _createMap;
+    script.onerror = function() {
+      document.getElementById('mapbox-map').innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;height:100%;' +
+        'color:#888;font-family:Sora,sans-serif;font-size:13px;text-align:center;padding:24px;">' +
+        'Map could not load — please check your connection.</div>';
+    };
+    document.head.appendChild(script);
+  }
+
+  function _createMap() {
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWtjaGVzcyIsImEiOiJjbWt5YjM0ejM0ejMwNmt6M2RzNm9sZmdoZGM4In0.FBGsSGKuCtYzLoDNbZx51Q';
+    mapInstance = new mapboxgl.Map({
+      container: 'mapbox-map',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [-0.765, 52.034],
+      zoom: 11.3,
+      attributionControl: false
+    });
+    mapInstance.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
+    mapInstance.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-left');
+    mapInstance.on('load', function(){
+      VENUES.forEach(function(venue){ addVenueMarker(venue); });
+    });
+  }
+
+  function addVenueMarker(venue) {
+    var session  = SESSIONS[venue.key];
+    var nextDate = getNextDate(venue.key);
+
+    // Marker pill element
+    var el = document.createElement('div');
+    el.className = 'map-marker';
+    el.innerHTML =
+      '<span class="mk-dot" style="background:' + session.dot + '"></span>' +
+      session.label;
+
+    // Popup HTML
+    var timeStr = nextDate ? (nextDate + ' · ' + session.time) : session.time;
+    var popupHTML =
+      '<img class="map-popup-img" src="' + session.img + '" alt="">' +
+      '<div class="map-popup-body">' +
+        '<div class="map-popup-header">' +
+          '<div class="map-popup-dot" style="background:' + session.dot + '"></div>' +
+          '<div class="map-popup-title">' + session.label + '</div>' +
+        '</div>' +
+        '<div class="map-popup-row">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+          timeStr +
+        '</div>' +
+        '<div class="map-popup-row">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+          session.location +
+        '</div>' +
+        '<div class="map-popup-row">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>' +
+          session.desc +
+        '</div>' +
+        '<a class="map-popup-link" href="' + session.url + '" target="_parent">View session →</a>' +
+      '</div>';
+
+    var popup = new mapboxgl.Popup({
+      offset: [0, -12],
+      closeButton: false,
+      closeOnClick: false,
+      anchor: 'bottom',
+      maxWidth: 'none'
+    }).setHTML(popupHTML);
+
+    new mapboxgl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([venue.lng, venue.lat])
+      .addTo(mapInstance);
+
+    var popupOpen = false;
+    var leaveTimer = null;
+
+    function openPopup() {
+      clearTimeout(leaveTimer);
+      el.classList.add('hovered');
+      popup.setLngLat([venue.lng, venue.lat]).addTo(mapInstance);
+      popupOpen = true;
+    }
+    function scheduleClose() {
+      leaveTimer = setTimeout(function(){
+        var popupEl = popup.getElement();
+        if (popupEl && popupEl.matches(':hover')) return;
+        el.classList.remove('hovered');
+        popup.remove();
+        popupOpen = false;
+      }, 100);
+    }
+
+    if (!usingTouch) {
+      el.addEventListener('mouseenter', openPopup);
+      el.addEventListener('mouseleave', scheduleClose);
+      popup.on('open', function(){
+        var popupEl = popup.getElement();
+        if (!popupEl) return;
+        popupEl.addEventListener('mouseenter', function(){ clearTimeout(leaveTimer); });
+        popupEl.addEventListener('mouseleave', function(){
+          if (!el.matches(':hover')) scheduleClose();
+        });
+      });
+    } else {
+      el.addEventListener('touchstart', function(e){
+        e.preventDefault(); e.stopPropagation();
+        if (popupOpen) {
+          el.classList.remove('hovered'); popup.remove(); popupOpen = false;
+        } else {
+          openPopup();
+        }
+      }, { passive: false });
+    }
+  }
+
+  // ── Calendar tooltip ──
   var tip       = document.getElementById('tooltip');
   var ttImgLink = document.getElementById('tt-img-link');
   var ttImg     = document.getElementById('tt-img');
@@ -439,29 +648,21 @@
 
   function showTip(triggerEl, session, dateStr) {
     clearTimeout(hideTimer);
-    if (session.img) {
-      ttImg.src = session.img;
-      ttImg.style.display = 'block';
-      ttImgLink.href = session.url;
-    } else {
-      ttImg.style.display = 'none';
-    }
-    ttDot.style.background  = session.dot;
-    ttTitle.textContent     = session.label;
-    ttTime.textContent      = dateStr + ' · ' + session.time;
-    ttLoc.textContent       = session.location;
-    ttDesc.textContent      = session.desc;
+    ttImg.src = session.img; ttImg.style.display = 'block'; ttImgLink.href = session.url;
+    ttDot.style.background = session.dot;
+    ttTitle.textContent    = session.label;
+    ttTime.textContent     = dateStr + ' · ' + session.time;
+    ttLoc.textContent      = session.location;
+    ttDesc.textContent     = session.desc;
     ttDescRow.style.display = session.desc ? 'flex' : 'none';
-    ttLink.href             = session.url;
+    ttLink.href = session.url;
     placeTip(triggerEl);
-    tip.classList.add('visible');
-    tipVisible = true;
+    tip.classList.add('visible'); tipVisible = true;
   }
   function placeTip(el) {
-    var r=el.getBoundingClientRect();
-    var tw=260, th=320;
-    var vw=window.innerWidth, vh=window.innerHeight;
-    var left=r.right+10, top=r.top;
+    var r=el.getBoundingClientRect(); var tw=260,th=320;
+    var vw=window.innerWidth,vh=window.innerHeight;
+    var left=r.right+10,top=r.top;
     if(left+tw>vw-8) left=r.left-tw-10;
     if(left<8) left=8;
     if(top+th>vh-8) top=vh-th-8;
@@ -469,20 +670,19 @@
     tip.style.left=left+'px'; tip.style.top=top+'px';
   }
   function scheduledHide(){ hideTimer=setTimeout(hideTip,120); }
-  function hideTip(){ tip.classList.remove('visible'); tipVisible = false; }
+  function hideTip(){ tip.classList.remove('visible'); tipVisible=false; }
 
-  // Dismiss tooltip when tapping outside it or the tooltip itself
   document.addEventListener('touchstart', function(e){
-    if (tipVisible && !tip.contains(e.target)) { hideTip(); }
+    if (tipVisible && !tip.contains(e.target)) hideTip();
   }, { passive: true });
-
   tip.addEventListener('mouseenter', function(){ clearTimeout(hideTimer); });
   tip.addEventListener('mouseleave', scheduledHide);
   document.getElementById('tt-close').addEventListener('click', hideTip);
 
-  // ── Render ──
+  // ── Calendar render ──
   function render() {
-    var today  = new Date(); today.setHours(0,0,0,0);
+    if (currentView !== 'calendar') return;
+    var today = new Date(); today.setHours(0,0,0,0);
     var events = getEvents(viewYear, viewMonth);
     document.getElementById('cal-title-text').textContent = MONTHS[viewMonth] + ' ' + viewYear;
 
@@ -509,54 +709,37 @@
       cell.className = cls;
 
       var num = document.createElement('div');
-      num.className = 'date-num';
-      num.textContent = d;
+      num.className = 'date-num'; num.textContent = d;
       cell.appendChild(num);
 
       if (evList) {
         evList.forEach(function(ev){
           var chip = document.createElement('button');
-          chip.className        = 'event-chip';
-          chip.textContent      = ev.label;
-          chip.style.background = ev.bg;
-          chip.style.color      = ev.color;
-
-          // Desktop: hover to show/hide
+          chip.className = 'event-chip'; chip.textContent = ev.label;
           chip.addEventListener('mouseenter', function(){ if (!usingTouch) showTip(chip, ev, dateStr); });
           chip.addEventListener('mouseleave', function(){ if (!usingTouch) scheduledHide(); });
-
-          // Touch: tap to toggle tooltip.
-          // stopPropagation prevents the document touchstart dismissal listener
-          // from immediately closing the tooltip we just opened.
           chip.addEventListener('touchstart', function(e){
-            e.preventDefault();
-            e.stopPropagation();
-            if (tipVisible) {
-              hideTip();
-            } else {
-              showTip(chip, ev, dateStr);
-            }
+            e.preventDefault(); e.stopPropagation();
+            if (tipVisible) { hideTip(); } else { showTip(chip, ev, dateStr); }
           }, { passive: false });
-
           cell.appendChild(chip);
         });
       }
       grid.appendChild(cell);
     }
 
-    for (var i=offset-1; i>=0; i--)       addCell(prevDays-i, true, false, null, '');
+    for (var i=offset-1; i>=0; i--)      addCell(prevDays-i, true, false, null, '');
     for (var d=1; d<=daysInMonth; d++) {
       var date    = new Date(viewYear, viewMonth, d);
       var isToday = date.getTime()===today.getTime();
-      var dow     = date.getDay();
-      var dowIdx  = (dow===0) ? 6 : dow-1;
+      var dow     = date.getDay(); var dowIdx = (dow===0)?6:dow-1;
       var dateStr = DAYS_SHORT[dowIdx]+' '+d+' '+MONTHS[viewMonth].slice(0,3);
       addCell(d, false, isToday, events[d]||null, dateStr);
     }
     for (var i=1; i<=totalCells-total; i++) addCell(i, true, false, null, '');
   }
 
-  window.addEventListener('resize', function(){ setSquareWidth(); });
+  window.addEventListener('resize', function(){ setSquareWidth(); if(mapInstance) mapInstance.resize(); });
 
   document.getElementById('btn-prev').addEventListener('click',  function(){ viewMonth--; if(viewMonth<0){viewMonth=11;viewYear--;} hideTip(); closePicker(); render(); });
   document.getElementById('btn-next').addEventListener('click',  function(){ viewMonth++; if(viewMonth>11){viewMonth=0;viewYear++;} hideTip(); closePicker(); render(); });
