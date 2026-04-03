@@ -263,12 +263,30 @@
     animation: marker-rise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     animation-delay: var(--marker-delay, 0ms);
   }
+  .map-marker::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    background: rgba(255,255,255,0.96);
+    border-right: 1px solid rgba(17, 24, 39, 0.14);
+    border-bottom: 1px solid rgba(17, 24, 39, 0.14);
+    transform: translateX(-50%) rotate(45deg);
+    border-bottom-right-radius: 2px;
+  }
   .map-marker:hover, .map-marker.hovered {
     transform: translateY(-1px) scale(1.06);
     box-shadow: 0 16px 28px rgba(15, 23, 42, 0.28), 0 4px 10px rgba(15, 23, 42, 0.18);
     border-color: rgba(17, 24, 39, 0.22);
   }
   .map-marker.hovered { background: #111827; color: #fff; border-color: #111827; }
+  .map-marker.hovered::after {
+    background: #111827;
+    border-right-color: #111827;
+    border-bottom-color: #111827;
+  }
   .map-marker .mk-dot {
     width: 8px;
     height: 8px;
@@ -522,17 +540,17 @@
   var DAYS_SHORT   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var SESSIONS = {
-    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 - 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place', img:'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf' },
-    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 - 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
-    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 - 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
-    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 - 11:30 AM',location:'Willen Lake Cafe, MK15 0DS',          desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake', img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8' }
+    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 - 7:30 PM', location:'Unity Place, 200 Grafton Gate, Milton Keynes, MK9 1UP',                                        desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place', img:'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf' },
+    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 - 7:30 PM', location:'South Central Institute of Technology, Selwyn Grove, Bletchley, Milton Keynes, MK3 6DR',           desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
+    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 - 7:30 PM', location:'National Badminton Centre, Bradwell Rd, Loughton Lodge, Great Holm, Milton Keynes, MK8 9LA',      desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
+    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 - 11:30 AM',location:'Willen Lake Cafe, Watersports Centre, Willen Lake, Milton Keynes, MK15 0DS',                    desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake', img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8' }
   };
 
   var VENUES = [
-    { key: 'learn',     lng: -0.7580, lat: 52.0403 },
-    { key: 'bletchley', lng: -0.7341, lat: 51.9985 },
-    { key: 'badminton', lng: -0.7914, lat: 52.0487 },
-    { key: 'sunday',    lng: -0.7116, lat: 52.0665 }
+    { key: 'learn',     lng: -0.7722635, lat: 52.0363588 },
+    { key: 'bletchley', lng: -0.7385730, lat: 51.9950372 },
+    { key: 'badminton', lng: -0.7848841, lat: 52.0378731 },
+    { key: 'sunday',    lng: -0.7209626, lat: 52.0517737 }
   ];
 
   var SUNDAY_START = new Date(2026, 3, 19);
@@ -705,7 +723,7 @@
     var nextDate = getNextDate(venue.key);
     var timeStr  = nextDate ? (nextDate + ' | ' + session.time) : session.time;
     var markerWidth  = Math.max(90, Math.round((session.label.length * 7.2) + 40));
-    var markerHeight = 34;
+    var markerHeight = 39;
 
     // Custom pill marker via DivIcon
     var icon = L.divIcon({
