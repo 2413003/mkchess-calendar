@@ -8,17 +8,18 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
+  html, body {
+    height: 100%;
+    overflow: hidden;
     font-family: 'Sora', sans-serif;
     background: #fff;
     color: #1f1f1f;
-    padding: 0;
   }
 
   .cal-wrap {
-    width: 100%;
-    max-width: none;
-    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     padding: 10px;
   }
 
@@ -27,7 +28,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
   }
   .cal-title {
     font-size: 20px;
@@ -73,41 +75,45 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     margin-bottom: 2px;
+    flex-shrink: 0;
   }
   .day-header {
     text-align: center;
     font-size: 11px;
     font-weight: 500;
     color: #70757a;
-    padding: 4px 0 8px;
+    padding: 4px 0 6px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
   }
 
-  /* Grid */
+  /* Grid — fills all remaining space, rows share it equally */
   .cal-grid {
+    flex: 1;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: 1fr;
     border-top: 1px solid #e0e0e0;
     border-left: 1px solid #e0e0e0;
+    min-height: 0; /* critical for flex children to shrink */
   }
   .cal-cell {
     border-right: 1px solid #e0e0e0;
     border-bottom: 1px solid #e0e0e0;
-    aspect-ratio: 1;
-    padding: 4px 4px 6px;
+    padding: 4px 4px 4px;
     position: relative;
     cursor: default;
     transition: background 0.1s;
     overflow: hidden;
+    min-height: 0;
   }
   .cal-cell.other-month { background: #fafafa; }
   .cal-cell:hover { background: #f8f9fa; }
 
   /* Date number */
   .date-num {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -115,7 +121,7 @@
     font-size: 12px;
     font-weight: 400;
     color: #3c4043;
-    margin: 0 auto 4px;
+    margin: 0 auto 3px;
   }
   .cal-cell.today .date-num {
     background: #1a73e8;
@@ -130,13 +136,13 @@
     width: 100%;
     font-size: 11px;
     font-weight: 500;
-    padding: 2px 6px;
+    padding: 2px 5px;
     border-radius: 4px;
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 18px;
+    line-height: 17px;
     text-decoration: none;
     border: none;
     text-align: left;
@@ -145,6 +151,29 @@
     transition: filter 0.12s;
   }
   .event-chip:hover { filter: brightness(0.92); }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e0e0e0;
+    flex-shrink: 0;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: #5f6368;
+  }
+  .legend-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
 
   /* Tooltip */
   .tooltip {
@@ -172,80 +201,32 @@
     margin-bottom: 10px;
   }
   .tt-title-wrap { display: flex; align-items: center; gap: 8px; }
-  .tt-dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .tt-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1f1f1f;
-    line-height: 1.3;
-  }
+  .tt-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; }
+  .tt-title { font-size: 14px; font-weight: 600; color: #1f1f1f; line-height: 1.3; }
   .tt-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #888;
-    font-size: 16px;
-    line-height: 1;
-    padding: 0 0 0 4px;
-    flex-shrink: 0;
+    background: none; border: none; cursor: pointer;
+    color: #888; font-size: 16px; line-height: 1; padding: 0 0 0 4px; flex-shrink: 0;
   }
   .tt-close:hover { color: #333; }
   .tt-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    font-size: 12.5px;
-    color: #5f6368;
-    margin-bottom: 7px;
-    line-height: 1.45;
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 12.5px; color: #5f6368; margin-bottom: 7px; line-height: 1.45;
   }
   .tt-row svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
   .tt-link {
-    display: inline-block;
-    margin-top: 10px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #1a73e8;
-    text-decoration: none;
-    padding: 5px 12px;
-    border-radius: 6px;
-    background: #e8f0fe;
-    transition: background 0.15s;
+    display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 500;
+    color: #1a73e8; text-decoration: none; padding: 5px 12px; border-radius: 6px;
+    background: #e8f0fe; transition: background 0.15s;
   }
   .tt-link:hover { background: #d2e3fc; }
-
-  /* Legend */
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 20px;
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid #e0e0e0;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 12px;
-    color: #5f6368;
-  }
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
 
   @media (max-width: 420px) {
     .cal-title { font-size: 16px; }
     .date-num { width: 18px; height: 18px; font-size: 9px; }
     .event-chip { font-size: 8px; padding: 1px 3px; line-height: 14px; }
     .today-btn { display: none; }
+    .legend { gap: 4px 12px; }
+    .legend-item { font-size: 10px; }
   }
 </style>
 </head>
@@ -302,10 +283,10 @@
   var DAYS_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var SESSIONS = {
-    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 – 7:30 PM', location:'Unity Place, MK9 1UP',                   desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place' },
-    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 – 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR',    desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley'   },
-    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 – 7:30 PM', location:'National Badminton Centre, MK8 9LA',       desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent'   },
-    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 – 11:30 AM',location:'Willen Lake Café, MK15 0DS',               desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake' }
+    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 – 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place' },
+    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 – 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley'   },
+    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 – 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent'   },
+    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 – 11:30 AM',location:'Willen Lake Café, MK15 0DS',            desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake' }
   };
 
   var LEGEND = [
@@ -315,14 +296,13 @@
     { key:'sunday',    text:'Every Sun — Willen Lake (from 19 Apr)' }
   ];
 
-  // Sunday sessions start from 19 April 2026
   var SUNDAY_START = new Date(2026, 3, 19);
 
   var now = new Date();
   var viewYear = now.getFullYear(), viewMonth = now.getMonth();
 
   function lastFriday(y,m)    { var d=new Date(y,m+1,0); while(d.getDay()!==5)d.setDate(d.getDate()-1); return d.getDate(); }
-  function firstWednesday(y,m){ var d=new Date(y,m,1);   while(d.getDay()!==3)d.setDate(d.getDate()+1); return d.getDate(); }
+  function firstWednesday(y,m){ var d=new Date(y,m,1); while(d.getDay()!==3)d.setDate(d.getDate()+1); return d.getDate(); }
   function secondThursday(y,m){ var d=new Date(y,m,1);var c=0;while(c<2){if(d.getDay()===4)c++;if(c<2)d.setDate(d.getDate()+1);}return d.getDate(); }
   function allSundays(y,m) {
     var s=[],d=new Date(y,m,1);
@@ -344,7 +324,6 @@
     return ev;
   }
 
-  // ── Tooltip ──
   var tip       = document.getElementById('tooltip');
   var ttDot     = document.getElementById('tt-dot');
   var ttTitle   = document.getElementById('tt-title');
@@ -391,16 +370,13 @@
   tip.addEventListener('mouseleave', scheduledHide);
   document.getElementById('tt-close').addEventListener('click', hideTip);
 
-  // ── Render ──
   function render() {
     var today  = new Date(); today.setHours(0,0,0,0);
     var events = getEvents(viewYear, viewMonth);
 
-    // Title
     var yearStr = (viewYear !== today.getFullYear()) ? ' <span>' + viewYear + '</span>' : '';
     document.getElementById('cal-title').innerHTML = MONTHS[viewMonth] + yearStr;
 
-    // Grid
     var grid = document.getElementById('cal-grid');
     grid.innerHTML = '';
 
@@ -409,7 +385,7 @@
     var daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
     var prevDays    = new Date(viewYear, viewMonth, 0).getDate();
 
-    for (var i = offset-1; i >= 0; i--)         appendCell(grid, prevDays-i, true,  false, null, '');
+    for (var i = offset-1; i >= 0; i--)    appendCell(grid, prevDays-i, true,  false, null, '');
     for (var d = 1; d <= daysInMonth; d++) {
       var date    = new Date(viewYear, viewMonth, d);
       var isToday = date.getTime() === today.getTime();
@@ -420,9 +396,8 @@
     }
     var total = offset + daysInMonth;
     var rows  = Math.ceil(total / 7) * 7;
-    for (var i = 1; i <= rows - total; i++)      appendCell(grid, i, true, false, null, '');
+    for (var i = 1; i <= rows - total; i++) appendCell(grid, i, true, false, null, '');
 
-    // Legend
     var leg = document.getElementById('legend');
     leg.innerHTML = '';
     LEGEND.forEach(function(item){
@@ -450,10 +425,10 @@
     if (evList) {
       evList.forEach(function(ev){
         var chip = document.createElement('button');
-        chip.className       = 'event-chip';
-        chip.textContent     = ev.label;
-        chip.style.background= ev.bg;
-        chip.style.color     = ev.color;
+        chip.className        = 'event-chip';
+        chip.textContent      = ev.label;
+        chip.style.background = ev.bg;
+        chip.style.color      = ev.color;
         chip.addEventListener('mouseenter', function(){ showTip(chip, ev, dateStr); });
         chip.addEventListener('mouseleave', scheduledHide);
         cell.appendChild(chip);
