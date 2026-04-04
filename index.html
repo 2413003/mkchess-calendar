@@ -458,7 +458,8 @@
     justify-content: flex-start;
     height: 8px;
     line-height: 0;
-    width: 46px;
+    width: 50px;
+    padding: 0 1px;
     overflow: hidden;
   }
   .map-popup-dots-track {
@@ -1068,7 +1069,7 @@
       if (dotsWrap && dotEls.length) {
         var visibleDotCount = Math.min(maxVisibleDots, dotEls.length);
         var computedWrapWidth = dotWidthPx + ((visibleDotCount - 1) * dotStepPx);
-        if (!isFinite(computedWrapWidth) || computedWrapWidth <= 0) computedWrapWidth = 46;
+        if (!isFinite(computedWrapWidth) || computedWrapWidth <= 0) computedWrapWidth = 50;
         dotsWrap.style.width = String(computedWrapWidth) + 'px';
       }
 
