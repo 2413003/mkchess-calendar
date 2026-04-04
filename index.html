@@ -41,6 +41,7 @@
   .cal-wrap.map-mode #month-picker { display: none !important; }
   .cal-wrap.map-mode .cal-header { justify-content: flex-end; }
   .cal-wrap.map-mode .view-toggle { margin-left: 0; }
+  .cal-wrap.map-mode { padding-bottom: 22px; }
 
   .today-btn {
     background: none;
@@ -213,7 +214,7 @@
     position: relative;
     border: 1px solid #d8dee8;
     background: #dfe6ed;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(15, 23, 42, 0.1);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14), 0 1px 4px rgba(15, 23, 42, 0.1);
     isolation: isolate;
   }
   #leaflet-map { width: 100%; height: 100%; }
@@ -479,6 +480,7 @@
     .today-btn { padding: 5px 10px; font-size: 12px; }
     .vt-btn { font-size: 11px; padding: 5px 9px; }
     .vt-btn svg { display: none; }
+    .cal-wrap.map-mode { padding-bottom: 16px; }
     #map-view { border-radius: 16px; }
     .map-hud { top: 10px; left: 10px; padding: 9px 10px; }
     .map-hud-title { font-size: 11px; }
@@ -540,8 +542,8 @@
   <!-- Map view (hidden by default) -->
   <div id="map-view" style="display:none">
     <div class="map-hud">
-      <div class="map-hud-title">MK Chess Map</div>
-      <div class="map-hud-sub">Tap a session for details</div>
+      <div class="map-hud-title">MK Chess Venues</div>
+      <div class="map-hud-sub">Tap a marker for session details</div>
     </div>
     <div id="leaflet-map"></div>
   </div>
