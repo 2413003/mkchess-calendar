@@ -319,7 +319,28 @@
   }
   .leaflet-popup-content { margin: 0 !important; width: 286px !important; line-height: 1; }
   .leaflet-popup-tip-container { display: none !important; }
-  .leaflet-popup-close-button { display: none !important; }
+  .leaflet-popup-close-button {
+    right: 10px !important;
+    top: 10px !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 999px !important;
+    color: #374151 !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    line-height: 24px !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    background: rgba(255,255,255,0.92) !important;
+    border: 1px solid rgba(17, 24, 39, 0.12) !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16) !important;
+    transition: background 0.15s, color 0.15s, transform 0.15s;
+  }
+  .leaflet-popup-close-button:hover {
+    background: #fff !important;
+    color: #111827 !important;
+    transform: scale(1.03);
+  }
   .leaflet-container { font-family: 'Sora', sans-serif; }
   .leaflet-tile-pane { filter: saturate(1.06) contrast(1.04) brightness(1.02); }
   .leaflet-control-zoom {
@@ -739,6 +760,16 @@
     }).addTo(mapInstance);
 
     L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+    mapInstance.on('click', function(){
+      mapInstance.closePopup();
+    });
+    var mapContainer = mapInstance.getContainer();
+    mapContainer.addEventListener('touchstart', function(e){
+      var target = e.target;
+      if (target && target.nodeType !== 1) target = target.parentElement;
+      if (target && target.closest && (target.closest('.leaflet-popup-content-wrapper') || target.closest('.map-marker'))) return;
+      mapInstance.closePopup();
+    }, { passive: true });
 
     var markers = VENUES.map(function(venue, idx){ return addVenueMarker(venue, idx); });
     if (markers.length) {
@@ -786,12 +817,13 @@
         '<a class="map-popup-link" href="' + session.url + '" target="_parent">View session</a>' +
       '</div>';
 
-    var popup = L.popup({ closeButton: false, offset: [0, -18], autoPan: true, keepInView: true, closeOnClick: false }).setContent(popupHTML);
+    var popup = L.popup({ closeButton: true, offset: [0, -18], autoPan: true, keepInView: true, closeOnClick: false }).setContent(popupHTML);
     marker.bindPopup(popup);
 
     var leaveTimer = null;
     var markerEl;
     var popupHoverEl = null;
+    var lastTouchToggleAt = 0;
 
     marker.on('add', function(){
       markerEl = marker.getElement();
@@ -805,6 +837,7 @@
       }
 
       inner.addEventListener('click', function(e){
+        if (usingTouch && (Date.now() - lastTouchToggleAt) < 500) return;
         e.preventDefault();
         e.stopPropagation();
         openPopup();
@@ -817,12 +850,15 @@
         inner.addEventListener('touchstart', function(e){
           e.preventDefault();
           e.stopPropagation();
-          openPopup();
+          lastTouchToggleAt = Date.now();
+          if (isPopupOpen()) closePopup();
+          else openPopup();
         }, { passive: false });
       }
     });
 
     marker.on('click', function(e){
+      if (usingTouch && (Date.now() - lastTouchToggleAt) < 500) return;
       if (e && e.originalEvent && typeof L !== 'undefined' && L.DomEvent) {
         L.DomEvent.stopPropagation(e.originalEvent);
       }
