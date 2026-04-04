@@ -473,6 +473,7 @@
     transform: scale(1.12);
     box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2), 0 1px 2px rgba(0,0,0,0.18);
   }
+  .map-popup-page-dot.is-hidden { display: none; }
   @media (hover: none), (pointer: coarse) {
     .map-popup-media.has-gallery .map-popup-nav {
       opacity: 1;
@@ -480,19 +481,6 @@
     }
   }
   .map-popup-body { padding: 13px 15px 16px; }
-  .map-popup-tag {
-    display: inline-flex;
-    align-items: center;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.35px;
-    text-transform: uppercase;
-    color: #374151;
-    background: #f3f4f6;
-    padding: 4px 8px;
-    border-radius: 999px;
-    margin-bottom: 10px;
-  }
   .map-popup-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .map-popup-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .map-popup-title { font-size: 15px; font-weight: 700; color: #111827; line-height: 1.3; }
@@ -954,7 +942,6 @@
         galleryDotsHTML +
       '</div>' +
       '<div class="map-popup-body">' +
-        '<div class="map-popup-tag">MK Chess</div>' +
         '<div class="map-popup-header">' +
           '<div class="map-popup-dot" style="background:' + session.dot + '"></div>' +
           '<div class="map-popup-title">' + session.label + '</div>' +
@@ -1047,14 +1034,31 @@
       var total = parseInt(media.getAttribute('data-gallery-size'), 10) || 1;
       var dotEls = media.querySelectorAll('[data-gallery-dot]');
       var currentIdx = parseInt(media.getAttribute('data-gallery-index'), 10) || 0;
+      var maxVisibleDots = 5;
 
       function setIndex(nextIdx) {
         if (total <= 1) return;
         currentIdx = ((nextIdx % total) + total) % total;
         media.setAttribute('data-gallery-index', String(currentIdx));
         track.style.transform = 'translateX(' + (-100 * currentIdx) + '%)';
+        var visibleStart = 0;
+        var visibleEnd = dotEls.length - 1;
+        if (dotEls.length > maxVisibleDots) {
+          var halfWindow = Math.floor(maxVisibleDots / 2);
+          visibleStart = currentIdx - halfWindow;
+          visibleEnd = currentIdx + halfWindow;
+          if (visibleStart < 0) {
+            visibleStart = 0;
+            visibleEnd = maxVisibleDots - 1;
+          }
+          if (visibleEnd > (dotEls.length - 1)) {
+            visibleEnd = dotEls.length - 1;
+            visibleStart = visibleEnd - maxVisibleDots + 1;
+          }
+        }
         for (var d = 0; d < dotEls.length; d++) {
           dotEls[d].classList.toggle('active', d === currentIdx);
+          dotEls[d].classList.toggle('is-hidden', d < visibleStart || d > visibleEnd);
         }
       }
 
