@@ -389,7 +389,84 @@
   .leaflet-control-attribution a { color: #4b5563 !important; text-decoration: none !important; }
   .leaflet-control-attribution a:hover { text-decoration: underline !important; }
 
-  .map-popup-img { width: 100%; height: 146px; object-fit: cover; display: block; }
+  .map-popup-media {
+    position: relative;
+    width: 100%;
+    height: 146px;
+    overflow: hidden;
+    background: #e5e7eb;
+  }
+  .map-popup-track {
+    display: flex;
+    height: 100%;
+    transform: translateX(0);
+    transition: transform 0.26s ease;
+    will-change: transform;
+  }
+  .map-popup-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+    height: 100%;
+  }
+  .map-popup-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .map-popup-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(17, 24, 39, 0.16);
+    background: rgba(255,255,255,0.95);
+    color: #111827;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    touch-action: manipulation;
+    transition: opacity 0.16s ease, transform 0.16s ease, background 0.16s ease;
+    z-index: 2;
+  }
+  .map-popup-nav svg { width: 14px; height: 14px; }
+  .map-popup-nav.prev { left: 8px; }
+  .map-popup-nav.next { right: 8px; }
+  .leaflet-popup-content-wrapper:hover .map-popup-media.has-gallery .map-popup-nav,
+  .leaflet-popup-content-wrapper:focus-within .map-popup-media.has-gallery .map-popup-nav {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .map-popup-nav:hover {
+    background: #fff;
+    transform: translateY(-50%) scale(1.03);
+  }
+  .map-popup-count {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    z-index: 2;
+    font-size: 10px;
+    font-weight: 600;
+    color: #111827;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    border-radius: 999px;
+    padding: 2px 7px;
+    line-height: 1.2;
+  }
+  @media (hover: none), (pointer: coarse) {
+    .map-popup-media.has-gallery .map-popup-nav {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
   .map-popup-body { padding: 13px 15px 16px; }
   .map-popup-tag {
     display: inline-flex;
@@ -542,8 +619,8 @@
   <!-- Map view (hidden by default) -->
   <div id="map-view" style="display:none">
     <div class="map-hud">
-      <div class="map-hud-title">MK Chess Map</div>
-      <div class="map-hud-sub">Tap a session for details</div>
+      <div class="map-hud-title">MK Chess Venues</div>
+      <div class="map-hud-sub">Tap a marker for session details</div>
     </div>
     <div id="leaflet-map"></div>
   </div>
@@ -588,7 +665,25 @@
     learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 - 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place', img:'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf' },
     bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 - 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
     badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 - 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
-    sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 - 11:30 AM',location:'Willen Lake Cafe, MK15 0DS',          desc:'Relaxed adults session overlooking the lake.',      url:'https://mkchess.co.uk/#willen-lake', img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8' }
+    sunday:    {
+      label:'Adults',
+      color:'#92400E',
+      bg:'#FEF3E2',
+      dot:'#B45309',
+      time:'10:00 - 11:30 AM',
+      location:'Willen Lake Cafe, MK15 0DS',
+      desc:'Relaxed adults session overlooking the lake.',
+      url:'https://mkchess.co.uk/#willen-lake',
+      img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8',
+      gallery:[
+        'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8',
+        'https://mkchess.co.uk/assets/images/image10.jpg?v=ae28773f',
+        'https://mkchess.co.uk/assets/images/image28.jpg?v=ae28773f',
+        'https://mkchess.co.uk/assets/images/image90.jpg?v=ae28773f',
+        'https://mkchess.co.uk/assets/images/image89.jpg?v=ae28773f',
+        'https://mkchess.co.uk/assets/images/image96.jpg?v=ae28773f'
+      ]
+    }
   };
 
   var VENUES = [
@@ -796,8 +891,29 @@
 
     var marker = L.marker([venue.lat, venue.lng], { icon: icon }).addTo(mapInstance);
 
+    var galleryImages = (Array.isArray(session.gallery) && session.gallery.length) ? session.gallery.slice() : [session.img];
+    if (galleryImages.indexOf(session.img) === -1) galleryImages.unshift(session.img);
+    var hasGallery = galleryImages.length > 1;
+    var gallerySlidesHTML = galleryImages.map(function(src){
+      return '<div class="map-popup-slide"><img class="map-popup-img" src="' + src + '" alt="' + session.label + '" loading="lazy"></div>';
+    }).join('');
+    var galleryControlsHTML = hasGallery
+      ? (
+          '<button class="map-popup-nav prev" type="button" data-dir="-1" aria-label="Previous image">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>' +
+          '</button>' +
+          '<button class="map-popup-nav next" type="button" data-dir="1" aria-label="Next image">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>' +
+          '</button>' +
+          '<div class="map-popup-count"><span data-gallery-current>1</span>/' + galleryImages.length + '</div>'
+        )
+      : '';
+
     var popupHTML =
-      '<img class="map-popup-img" src="' + session.img + '" alt="">' +
+      '<div class="map-popup-media' + (hasGallery ? ' has-gallery' : '') + '" data-gallery-size="' + galleryImages.length + '" data-gallery-index="0">' +
+        '<div class="map-popup-track">' + gallerySlidesHTML + '</div>' +
+        galleryControlsHTML +
+      '</div>' +
       '<div class="map-popup-body">' +
         '<div class="map-popup-tag">MK Chess</div>' +
         '<div class="map-popup-header">' +
@@ -881,11 +997,55 @@
         if (!inner2 || !inner2.matches(':hover')) scheduleClose();
       });
     }
+    function bindPopupGallery() {
+      var pw = marker.getPopup() && marker.getPopup().getElement();
+      if (!pw) return;
+      var media = pw.querySelector('.map-popup-media');
+      if (!media) return;
+      var track = media.querySelector('.map-popup-track');
+      if (!track) return;
+
+      var total = parseInt(media.getAttribute('data-gallery-size'), 10) || 1;
+      var currentEl = media.querySelector('[data-gallery-current]');
+      var currentIdx = parseInt(media.getAttribute('data-gallery-index'), 10) || 0;
+
+      function setIndex(nextIdx) {
+        if (total <= 1) return;
+        currentIdx = ((nextIdx % total) + total) % total;
+        media.setAttribute('data-gallery-index', String(currentIdx));
+        track.style.transform = 'translateX(' + (-100 * currentIdx) + '%)';
+        if (currentEl) currentEl.textContent = String(currentIdx + 1);
+      }
+
+      if (media.getAttribute('data-gallery-bound') !== '1' && total > 1) {
+        var navButtons = media.querySelectorAll('.map-popup-nav');
+        for (var n = 0; n < navButtons.length; n++) {
+          (function(btn){
+            btn.addEventListener('click', function(e){
+              e.preventDefault();
+              e.stopPropagation();
+              var dir = parseInt(btn.getAttribute('data-dir'), 10) || 0;
+              setIndex(currentIdx + dir);
+            });
+            btn.addEventListener('touchstart', function(e){
+              e.stopPropagation();
+            }, { passive: true });
+            btn.addEventListener('mousedown', function(e){
+              e.stopPropagation();
+            });
+          })(navButtons[n]);
+        }
+        media.setAttribute('data-gallery-bound', '1');
+      }
+
+      setIndex(0);
+    }
     function openPopup() {
       clearTimeout(leaveTimer);
       if (markerEl) markerEl.querySelector('.map-marker').classList.add('hovered');
       if (!isPopupOpen()) marker.openPopup();
       bindPopupHoverOnce();
+      bindPopupGallery();
     }
     function closePopup() {
       clearTimeout(leaveTimer);
@@ -903,6 +1063,7 @@
     marker.on('popupopen', function(){
       if (markerEl) markerEl.querySelector('.map-marker').classList.add('hovered');
       bindPopupHoverOnce();
+      bindPopupGallery();
     });
     marker.on('popupclose', function(){
       if (markerEl) markerEl.querySelector('.map-marker').classList.remove('hovered');
