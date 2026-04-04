@@ -447,19 +447,31 @@
     background: #fff;
     transform: translateY(-50%) scale(1.03);
   }
-  .map-popup-count {
+  .map-popup-dots {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
     z-index: 2;
-    font-size: 10px;
-    font-weight: 600;
-    color: #111827;
-    background: rgba(255,255,255,0.9);
-    border: 1px solid rgba(17, 24, 39, 0.12);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
     border-radius: 999px;
-    padding: 2px 7px;
-    line-height: 1.2;
+    background: rgba(17, 24, 39, 0.22);
+    backdrop-filter: blur(2px);
+  }
+  .map-popup-page-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.56);
+    transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+    cursor: pointer;
+  }
+  .map-popup-page-dot.active {
+    background: #fff;
+    transform: scale(1.18);
   }
   @media (hover: none), (pointer: coarse) {
     .map-popup-media.has-gallery .map-popup-nav {
@@ -619,8 +631,8 @@
   <!-- Map view (hidden by default) -->
   <div id="map-view" style="display:none">
     <div class="map-hud">
-      <div class="map-hud-title">MK Chess Venues</div>
-      <div class="map-hud-sub">Tap a marker for session details</div>
+      <div class="map-hud-title">MK Chess Maps</div>
+      <div class="map-hud-sub">Tap a session for details</div>
     </div>
     <div id="leaflet-map"></div>
   </div>
@@ -904,8 +916,16 @@
           '</button>' +
           '<button class="map-popup-nav next" type="button" data-dir="1" aria-label="Next image">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>' +
-          '</button>' +
-          '<div class="map-popup-count"><span data-gallery-current>1</span>/' + galleryImages.length + '</div>'
+          '</button>'
+        )
+      : '';
+    var galleryDotsHTML = hasGallery
+      ? (
+          '<div class="map-popup-dots">' +
+            galleryImages.map(function(_, dotIdx){
+              return '<span class="map-popup-page-dot' + (dotIdx === 0 ? ' active' : '') + '" data-gallery-dot="' + dotIdx + '"></span>';
+            }).join('') +
+          '</div>'
         )
       : '';
 
@@ -913,6 +933,7 @@
       '<div class="map-popup-media' + (hasGallery ? ' has-gallery' : '') + '" data-gallery-size="' + galleryImages.length + '" data-gallery-index="0">' +
         '<div class="map-popup-track">' + gallerySlidesHTML + '</div>' +
         galleryControlsHTML +
+        galleryDotsHTML +
       '</div>' +
       '<div class="map-popup-body">' +
         '<div class="map-popup-tag">MK Chess</div>' +
@@ -1006,7 +1027,7 @@
       if (!track) return;
 
       var total = parseInt(media.getAttribute('data-gallery-size'), 10) || 1;
-      var currentEl = media.querySelector('[data-gallery-current]');
+      var dotEls = media.querySelectorAll('[data-gallery-dot]');
       var currentIdx = parseInt(media.getAttribute('data-gallery-index'), 10) || 0;
 
       function setIndex(nextIdx) {
@@ -1014,7 +1035,9 @@
         currentIdx = ((nextIdx % total) + total) % total;
         media.setAttribute('data-gallery-index', String(currentIdx));
         track.style.transform = 'translateX(' + (-100 * currentIdx) + '%)';
-        if (currentEl) currentEl.textContent = String(currentIdx + 1);
+        for (var d = 0; d < dotEls.length; d++) {
+          dotEls[d].classList.toggle('active', d === currentIdx);
+        }
       }
 
       if (media.getAttribute('data-gallery-bound') !== '1' && total > 1) {
@@ -1034,6 +1057,19 @@
               e.stopPropagation();
             });
           })(navButtons[n]);
+        }
+        for (var di = 0; di < dotEls.length; di++) {
+          (function(dot){
+            dot.addEventListener('click', function(e){
+              e.preventDefault();
+              e.stopPropagation();
+              var dotIdx = parseInt(dot.getAttribute('data-gallery-dot'), 10) || 0;
+              setIndex(dotIdx);
+            });
+            dot.addEventListener('touchstart', function(e){
+              e.stopPropagation();
+            }, { passive: true });
+          })(dotEls[di]);
         }
         media.setAttribute('data-gallery-bound', '1');
       }
