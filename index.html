@@ -435,6 +435,11 @@
     background: #fff;
     transform: translateY(-50%) scale(1.03);
   }
+  .map-popup-nav.is-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden;
+  }
   .map-popup-dots {
     position: absolute;
     left: 50%;
@@ -1026,6 +1031,8 @@
       if (!track) return;
       var dotsWrap = media.querySelector('.map-popup-dots');
       var dotsTrack = media.querySelector('.map-popup-dots-track');
+      var prevBtn = media.querySelector('.map-popup-nav.prev');
+      var nextBtn = media.querySelector('.map-popup-nav.next');
 
       var total = parseInt(media.getAttribute('data-gallery-size'), 10) || 1;
       var dotEls = media.querySelectorAll('[data-gallery-dot]');
@@ -1043,7 +1050,9 @@
 
       function setIndex(nextIdx) {
         if (total <= 1) return;
-        currentIdx = ((nextIdx % total) + total) % total;
+        if (nextIdx < 0) nextIdx = 0;
+        if (nextIdx > (total - 1)) nextIdx = total - 1;
+        currentIdx = nextIdx;
         media.setAttribute('data-gallery-index', String(currentIdx));
         track.style.transform = 'translateX(' + (-100 * currentIdx) + '%)';
         var shiftStart = 0;
@@ -1057,6 +1066,8 @@
         for (var d = 0; d < dotEls.length; d++) {
           dotEls[d].classList.toggle('active', d === currentIdx);
         }
+        if (prevBtn) prevBtn.classList.toggle('is-hidden', currentIdx === 0);
+        if (nextBtn) nextBtn.classList.toggle('is-hidden', currentIdx === (total - 1));
       }
 
       if (media.getAttribute('data-gallery-bound') !== '1' && total > 1) {
