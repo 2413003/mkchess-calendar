@@ -460,9 +460,11 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    height: 8px;
+    height: 10px;
     line-height: 0;
-    width: 52px;
+    width: 74px;
+    padding: 0 2px;
+    box-sizing: border-box;
     overflow: hidden;
   }
   .map-popup-dots-track {
@@ -478,21 +480,30 @@
   .map-popup-page-dot {
     display: block;
     flex: 0 0 auto;
-    box-sizing: border-box;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    background: rgba(255,255,255,0.42);
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.26);
     opacity: 1;
-    transition: background 0.18s ease, opacity 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    transition: background 0.18s ease, opacity 0.18s ease;
     cursor: pointer;
   }
+  .map-popup-page-dot::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    margin: 2px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.56);
+    transition: background 0.18s ease;
+  }
   .map-popup-page-dot.active {
-    background: rgba(255,255,255,1);
+    background: rgba(15, 23, 42, 0.35);
     opacity: 1;
-    border-color: rgba(15, 23, 42, 0.38);
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.35), 0 1px 2px rgba(0,0,0,0.22);
+  }
+  .map-popup-page-dot.active::before {
+    background: #fff;
   }
   @media (hover: none), (pointer: coarse) {
     .map-popup-media.has-gallery .map-popup-nav {
@@ -1059,21 +1070,13 @@
       var dotEls = media.querySelectorAll('[data-gallery-dot]');
       var currentIdx = parseInt(media.getAttribute('data-gallery-index'), 10) || 0;
       var maxVisibleDots = 5;
-      var dotStepPx = 10;
-      var dotWidthPx = 6;
-
-      if (dotEls.length > 1) {
-        var measuredStep = dotEls[1].offsetLeft - dotEls[0].offsetLeft;
-        if (measuredStep > 0) dotStepPx = measuredStep;
-      }
-      if (dotEls.length) {
-        var measuredWidth = dotEls[0].getBoundingClientRect().width;
-        if (measuredWidth > 0) dotWidthPx = measuredWidth;
-      }
+      var dotWidthPx = 10;
+      var dotGapPx = 5;
+      var dotStepPx = dotWidthPx + dotGapPx;
       if (dotsWrap && dotEls.length) {
         var visibleDotCount = Math.min(maxVisibleDots, dotEls.length);
-        var computedWrapWidth = dotWidthPx + ((visibleDotCount - 1) * dotStepPx) + 2;
-        if (!isFinite(computedWrapWidth) || computedWrapWidth <= 0) computedWrapWidth = 52;
+        var computedWrapWidth = dotWidthPx + ((visibleDotCount - 1) * dotStepPx) + 4;
+        if (!isFinite(computedWrapWidth) || computedWrapWidth <= 0) computedWrapWidth = 74;
         dotsWrap.style.width = String(computedWrapWidth) + 'px';
       }
 
