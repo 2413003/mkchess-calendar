@@ -458,8 +458,7 @@
     justify-content: flex-start;
     height: 8px;
     line-height: 0;
-    width: 50px;
-    padding: 0 1px;
+    width: 52px;
     overflow: hidden;
   }
   .map-popup-dots-track {
@@ -475,20 +474,20 @@
   .map-popup-page-dot {
     display: block;
     flex: 0 0 auto;
+    box-sizing: border-box;
     width: 6px;
     height: 6px;
     border-radius: 50%;
+    border: 1px solid rgba(15, 23, 42, 0.16);
     background: rgba(255,255,255,0.78);
     opacity: 1;
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2), 0 0 2px rgba(15, 23, 42, 0.28);
-    transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+    transition: background 0.18s ease, opacity 0.18s ease, border-color 0.18s ease;
     cursor: pointer;
   }
   .map-popup-page-dot.active {
     background: rgba(255,255,255,0.98);
     opacity: 1;
-    transform: scale(1.12);
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2), 0 1px 2px rgba(0,0,0,0.18);
+    border-color: rgba(15, 23, 42, 0.26);
   }
   @media (hover: none), (pointer: coarse) {
     .map-popup-media.has-gallery .map-popup-nav {
@@ -1068,8 +1067,8 @@
       }
       if (dotsWrap && dotEls.length) {
         var visibleDotCount = Math.min(maxVisibleDots, dotEls.length);
-        var computedWrapWidth = dotWidthPx + ((visibleDotCount - 1) * dotStepPx);
-        if (!isFinite(computedWrapWidth) || computedWrapWidth <= 0) computedWrapWidth = 50;
+        var computedWrapWidth = dotWidthPx + ((visibleDotCount - 1) * dotStepPx) + 2;
+        if (!isFinite(computedWrapWidth) || computedWrapWidth <= 0) computedWrapWidth = 52;
         dotsWrap.style.width = String(computedWrapWidth) + 'px';
       }
 
