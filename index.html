@@ -450,28 +450,28 @@
   .map-popup-dots {
     position: absolute;
     left: 50%;
-    bottom: 10px;
+    bottom: 11px;
     transform: translateX(-50%);
     z-index: 2;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 3px 6px;
-    border-radius: 999px;
-    background: rgba(17, 24, 39, 0.22);
-    backdrop-filter: blur(2px);
+    gap: 5px;
   }
   .map-popup-page-dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.56);
-    transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+    background: rgba(255,255,255,0.52);
+    opacity: 0.9;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12);
+    transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
     cursor: pointer;
   }
   .map-popup-page-dot.active {
-    background: #fff;
-    transform: scale(1.18);
+    background: rgba(255,255,255,0.98);
+    opacity: 1;
+    transform: scale(1.12);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2), 0 1px 2px rgba(0,0,0,0.18);
   }
   @media (hover: none), (pointer: coarse) {
     .map-popup-media.has-gallery .map-popup-nav {
@@ -674,7 +674,25 @@
   var DAYS_SHORT   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   var SESSIONS = {
-    learn:     { label:'Learn Chess', color:'#3C3489', bg:'#EEEDFE', dot:'#3C3489', time:'6:00 - 7:30 PM', location:'Unity Place, MK9 1UP',                desc:'Beginners coaching. Small groups & 1:1 teaching.',  url:'https://mkchess.co.uk/#unity-place', img:'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf' },
+    learn:     {
+      label:'Learn Chess',
+      color:'#3C3489',
+      bg:'#EEEDFE',
+      dot:'#3C3489',
+      time:'6:00 - 7:30 PM',
+      location:'Unity Place, MK9 1UP',
+      desc:'Beginners coaching. Small groups & 1:1 teaching.',
+      url:'https://mkchess.co.uk/#unity-place',
+      img:'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf',
+      gallery:[
+        'https://mkchess.co.uk/assets/images/image80.jpg?v=a0f4c5bf',
+        'https://mkchess.co.uk/assets/images/image56.jpg?v=5efaad71',
+        'https://mkchess.co.uk/assets/images/image14.jpg?v=5efaad71',
+        'https://mkchess.co.uk/assets/images/image69.jpg?v=5efaad71',
+        'https://mkchess.co.uk/assets/images/image62.jpg?v=5efaad71',
+        'https://mkchess.co.uk/assets/images/image51.jpg?v=5efaad71'
+      ]
+    },
     bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 - 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
     badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 - 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
     sunday:    {
