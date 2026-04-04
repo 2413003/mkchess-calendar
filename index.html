@@ -227,22 +227,6 @@
     background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 24%);
   }
 
-  .map-hud {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    z-index: 500;
-    pointer-events: none;
-    border-radius: 14px;
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.9);
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
-  }
-  .map-hud-title { font-size: 12px; font-weight: 700; color: #111827; line-height: 1.1; }
-  .map-hud-sub { margin-top: 4px; font-size: 11px; color: #4b5563; line-height: 1.2; }
-
   /* Custom map markers */
   .map-marker-wrap {
     border: none !important;
@@ -575,9 +559,6 @@
     .vt-btn svg { display: none; }
     .cal-wrap.map-mode { padding-bottom: 16px; }
     #map-view { border-radius: 16px; }
-    .map-hud { top: 10px; left: 10px; padding: 9px 10px; }
-    .map-hud-title { font-size: 11px; }
-    .map-hud-sub { font-size: 10px; }
   }
 </style>
 </head>
@@ -634,10 +615,6 @@
 
   <!-- Map view (hidden by default) -->
   <div id="map-view" style="display:none">
-    <div class="map-hud">
-      <div class="map-hud-title">MK Chess Maps</div>
-      <div class="map-hud-sub">Tap a session for details</div>
-    </div>
     <div id="leaflet-map"></div>
   </div>
 </div>
