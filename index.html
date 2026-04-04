@@ -453,9 +453,17 @@
     bottom: 11px;
     transform: translateX(-50%);
     z-index: 2;
+    display: block;
+    height: 6px;
+    overflow: hidden;
+  }
+  .map-popup-dots-track {
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    width: max-content;
+    transform: translateX(0);
+    transition: transform 0.2s ease;
   }
   .map-popup-page-dot {
     width: 5px;
@@ -473,7 +481,6 @@
     transform: scale(1.12);
     box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2), 0 1px 2px rgba(0,0,0,0.18);
   }
-  .map-popup-page-dot.is-hidden { display: none; }
   @media (hover: none), (pointer: coarse) {
     .map-popup-media.has-gallery .map-popup-nav {
       opacity: 1;
@@ -928,9 +935,11 @@
     var galleryDotsHTML = hasGallery
       ? (
           '<div class="map-popup-dots">' +
-            galleryImages.map(function(_, dotIdx){
-              return '<span class="map-popup-page-dot' + (dotIdx === 0 ? ' active' : '') + '" data-gallery-dot="' + dotIdx + '"></span>';
-            }).join('') +
+            '<div class="map-popup-dots-track">' +
+              galleryImages.map(function(_, dotIdx){
+                return '<span class="map-popup-page-dot' + (dotIdx === 0 ? ' active' : '') + '" data-gallery-dot="' + dotIdx + '"></span>';
+              }).join('') +
+            '</div>' +
           '</div>'
         )
       : '';
@@ -1030,35 +1039,38 @@
       if (!media) return;
       var track = media.querySelector('.map-popup-track');
       if (!track) return;
+      var dotsWrap = media.querySelector('.map-popup-dots');
+      var dotsTrack = media.querySelector('.map-popup-dots-track');
 
       var total = parseInt(media.getAttribute('data-gallery-size'), 10) || 1;
       var dotEls = media.querySelectorAll('[data-gallery-dot]');
       var currentIdx = parseInt(media.getAttribute('data-gallery-index'), 10) || 0;
       var maxVisibleDots = 5;
+      var dotStepPx = 10;
+      var dotWidthPx = 5;
+
+      if (dotEls.length > 1) dotStepPx = dotEls[1].offsetLeft - dotEls[0].offsetLeft;
+      if (dotEls.length) dotWidthPx = dotEls[0].offsetWidth || dotWidthPx;
+      if (dotsWrap && dotEls.length) {
+        var visibleDotCount = Math.min(maxVisibleDots, dotEls.length);
+        dotsWrap.style.width = String(dotWidthPx + ((visibleDotCount - 1) * dotStepPx)) + 'px';
+      }
 
       function setIndex(nextIdx) {
         if (total <= 1) return;
         currentIdx = ((nextIdx % total) + total) % total;
         media.setAttribute('data-gallery-index', String(currentIdx));
         track.style.transform = 'translateX(' + (-100 * currentIdx) + '%)';
-        var visibleStart = 0;
-        var visibleEnd = dotEls.length - 1;
+        var shiftStart = 0;
         if (dotEls.length > maxVisibleDots) {
-          var halfWindow = Math.floor(maxVisibleDots / 2);
-          visibleStart = currentIdx - halfWindow;
-          visibleEnd = currentIdx + halfWindow;
-          if (visibleStart < 0) {
-            visibleStart = 0;
-            visibleEnd = maxVisibleDots - 1;
-          }
-          if (visibleEnd > (dotEls.length - 1)) {
-            visibleEnd = dotEls.length - 1;
-            visibleStart = visibleEnd - maxVisibleDots + 1;
-          }
+          shiftStart = currentIdx - Math.floor(maxVisibleDots / 2);
+          if (shiftStart < 0) shiftStart = 0;
+          var maxShiftStart = dotEls.length - maxVisibleDots;
+          if (shiftStart > maxShiftStart) shiftStart = maxShiftStart;
         }
+        if (dotsTrack) dotsTrack.style.transform = 'translateX(' + (-shiftStart * dotStepPx) + 'px)';
         for (var d = 0; d < dotEls.length; d++) {
           dotEls[d].classList.toggle('active', d === currentIdx);
-          dotEls[d].classList.toggle('is-hidden', d < visibleStart || d > visibleEnd);
         }
       }
 
