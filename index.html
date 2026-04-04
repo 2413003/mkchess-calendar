@@ -466,6 +466,8 @@
     transition: transform 0.2s ease;
   }
   .map-popup-page-dot {
+    display: block;
+    flex: 0 0 auto;
     width: 5px;
     height: 5px;
     border-radius: 50%;
@@ -1049,8 +1051,14 @@
       var dotStepPx = 10;
       var dotWidthPx = 5;
 
-      if (dotEls.length > 1) dotStepPx = dotEls[1].offsetLeft - dotEls[0].offsetLeft;
-      if (dotEls.length) dotWidthPx = dotEls[0].offsetWidth || dotWidthPx;
+      if (dotEls.length > 1) {
+        var measuredStep = dotEls[1].offsetLeft - dotEls[0].offsetLeft;
+        if (measuredStep > 0) dotStepPx = measuredStep;
+      }
+      if (dotEls.length) {
+        var measuredWidth = dotEls[0].getBoundingClientRect().width;
+        if (measuredWidth > 0) dotWidthPx = measuredWidth;
+      }
       if (dotsWrap && dotEls.length) {
         var visibleDotCount = Math.min(maxVisibleDots, dotEls.length);
         dotsWrap.style.width = String(dotWidthPx + ((visibleDotCount - 1) * dotStepPx)) + 'px';
