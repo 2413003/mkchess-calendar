@@ -681,35 +681,14 @@
     },
     bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 - 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
     badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 - 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
-    sunday:    {
-      label:'Adults',
-      color:'#92400E',
-      bg:'#FEF3E2',
-      dot:'#B45309',
-      time:'10:00 - 11:30 AM',
-      location:'Willen Lake Cafe, MK15 0DS',
-      desc:'Relaxed adults session overlooking the lake.',
-      url:'https://mkchess.co.uk/#willen-lake',
-      img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8',
-      gallery:[
-        'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8',
-        'https://mkchess.co.uk/assets/images/image10.jpg?v=ae28773f',
-        'https://mkchess.co.uk/assets/images/image28.jpg?v=ae28773f',
-        'https://mkchess.co.uk/assets/images/image90.jpg?v=ae28773f',
-        'https://mkchess.co.uk/assets/images/image89.jpg?v=ae28773f',
-        'https://mkchess.co.uk/assets/images/image96.jpg?v=ae28773f'
-      ]
-    }
   };
 
   var VENUES = [
     { key: 'learn',     lng: -0.7722635, lat: 52.0363588 },
     { key: 'bletchley', lng: -0.7385730, lat: 51.9950372 },
     { key: 'badminton', lng: -0.7848841, lat: 52.0378731 },
-    { key: 'sunday',    lng: -0.7209626, lat: 52.0517737 }
   ];
 
-  var SUNDAY_START = new Date(2026, 3, 19);
   var now = new Date();
   var viewYear = now.getFullYear(), viewMonth = now.getMonth();
   var pickerYear = viewYear, pickerOpen = false;
@@ -730,18 +709,11 @@
   function lastFriday(y,m)    { var d=new Date(y,m+1,0); while(d.getDay()!==5)d.setDate(d.getDate()-1); return d.getDate(); }
   function firstWednesday(y,m){ var d=new Date(y,m,1); while(d.getDay()!==3)d.setDate(d.getDate()+1); return d.getDate(); }
   function secondThursday(y,m){ var d=new Date(y,m,1);var c=0;while(c<2){if(d.getDay()===4)c++;if(c<2)d.setDate(d.getDate()+1);}return d.getDate(); }
-  function allSundays(y,m) {
-    var s=[],d=new Date(y,m,1);
-    while(d.getDay()!==0) d.setDate(d.getDate()+1);
-    while(d.getMonth()===m){ if(d>=SUNDAY_START) s.push(d.getDate()); d.setDate(d.getDate()+7); }
-    return s;
-  }
   function getEvents(y,m){
     var ev={};
     function add(day,key){ if(!ev[day])ev[day]=[]; ev[day].push(SESSIONS[key]); }
     add(lastFriday(y,m),'learn'); add(firstWednesday(y,m),'bletchley');
     add(secondThursday(y,m),'badminton');
-    allSundays(y,m).forEach(function(d){ add(d,'sunday'); });
     return ev;
   }
 
