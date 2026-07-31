@@ -823,7 +823,10 @@
     function add(day,key){ if(!ev[day])ev[day]=[]; ev[day].push(createEvent(y,m,day,key)); }
     add(lastFriday(y,m),'learn'); add(firstWednesday(y,m),'bletchley');
     add(secondThursday(y,m),'badminton');
-    allThursdays(y,m).forEach(function(day){ add(day,'lionsun'); });
+    var lionSunStart = new Date(2026,7,6);
+    allThursdays(y,m).forEach(function(day){
+      if (new Date(y,m,day) >= lionSunStart) add(day,'lionsun');
+    });
     return ev;
   }
 
