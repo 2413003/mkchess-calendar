@@ -691,7 +691,6 @@
     lionsun:   { label:'Adults Chess', color:'#6B21A8', bg:'#F3E8FF', dot:'#6B21A8', time:'6:00 - 8:00 PM',   location:'Lion & Sun Tavern, MK13 0DX',         desc:'Weekly adult session. Unhosted, casual play.',       url:'https://mkchess.co.uk/#lion-sun-tavern', img:'https://mkchess.co.uk/assets/images/image02.jpg?v=323ffd2e',
       gallery:[
         'https://mkchess.co.uk/assets/images/image02.jpg?v=323ffd2e',
-        'https://mkchess.co.uk/assets/images/image03.jpg?v=323ffd2e',
         'https://mkchess.co.uk/assets/images/image28.jpg?v=323ffd2e',
         'https://mkchess.co.uk/assets/images/image90.jpg?v=323ffd2e',
         'https://mkchess.co.uk/assets/images/image51.jpg?v=323ffd2e'
@@ -1237,18 +1236,31 @@
   var hideTimer = null;
   var tipVisible = false;
 
+  var tipReqId = 0;
   function showTip(triggerEl, session, dateStr) {
     clearTimeout(hideTimer);
-    ttImg.src = session.img; ttImg.style.display = 'block'; ttImgLink.href = session.url;
-    ttDot.style.background = session.dot;
-    ttTitle.textContent    = session.cancelled ? session.label + ' cancelled' : session.label;
-    ttTime.textContent     = dateStr + ' | ' + (session.cancelled ? 'Cancelled' : session.time);
-    ttLoc.textContent      = session.location;
-    ttDesc.textContent     = session.cancelled ? session.cancellationReason : session.desc;
-    ttDescRow.style.display = (session.cancelled || session.desc) ? 'flex' : 'none';
-    ttLink.href = session.url;
-    placeTip(triggerEl);
-    tip.classList.add('visible'); tipVisible = true;
+    var reqId = ++tipReqId;
+    function apply() {
+      if (reqId !== tipReqId) return; // a newer hover has since taken over
+      ttImg.src = session.img; ttImg.style.display = 'block'; ttImgLink.href = session.url;
+      ttDot.style.background = session.dot;
+      ttTitle.textContent    = session.cancelled ? session.label + ' cancelled' : session.label;
+      ttTime.textContent     = dateStr + ' | ' + (session.cancelled ? 'Cancelled' : session.time);
+      ttLoc.textContent      = session.location;
+      ttDesc.textContent     = session.cancelled ? session.cancellationReason : session.desc;
+      ttDescRow.style.display = (session.cancelled || session.desc) ? 'flex' : 'none';
+      ttLink.href = session.url;
+      placeTip(triggerEl);
+      tip.classList.add('visible'); tipVisible = true;
+    }
+    // Preload the photo so it's never displayed alongside another session's
+    // position/text (browsers otherwise keep showing the previous <img> src
+    // until the new one finishes loading).
+    var pre = new Image();
+    pre.onload = apply;
+    pre.onerror = apply;
+    pre.src = session.img;
+    if (pre.complete) apply();
   }
   function placeTip(el) {
     var r=el.getBoundingClientRect(); var tw=260,th=320;
