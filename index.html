@@ -733,8 +733,9 @@
   function addDays(date, days){ var d=new Date(date); d.setDate(d.getDate()+days); return d; }
 
   var EXTRA_CANCELLED_DATES = {
-    '2026-06-26': 'This session is cancelled.',
-    '2026-07-09': 'This session is cancelled. Due to heat.'
+    '2026-06-26|learn': 'This session is cancelled.',
+    '2026-07-09|badminton': 'This session is cancelled. Due to heat.',
+    '2026-08-13|badminton': 'This session is cancelled. Due to heat - health & safety risk.'
   };
 
   var FIXED_CLOSURE_DATES = {
@@ -788,17 +789,17 @@
     return closures;
   }
 
-  function getCancellation(y,m,d) {
+  function getCancellation(y,m,d,sessionKey) {
     var key = dateKey(y,m,d);
     var fixedKey = String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
     var bankHolidayClosures = getBankHolidayClosures(y);
-    var reason = EXTRA_CANCELLED_DATES[key] || FIXED_CLOSURE_DATES[fixedKey] || bankHolidayClosures[key];
+    var reason = EXTRA_CANCELLED_DATES[key + '|' + sessionKey] || FIXED_CLOSURE_DATES[fixedKey] || bankHolidayClosures[key];
     return reason ? { reason: reason } : null;
   }
 
   function createEvent(y,m,day,key) {
     var session = SESSIONS[key];
-    var cancellation = getCancellation(y,m,day);
+    var cancellation = getCancellation(y,m,day,key);
     return {
       key: key,
       session: session,
