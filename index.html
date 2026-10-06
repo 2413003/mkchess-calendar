@@ -912,7 +912,7 @@
     requestAnimationFrame(function(){ requestAnimationFrame(initMap); });
   });
 
-  // -- Map (Leaflet + Esri Light Gray tiles) --
+  // -- Map (Leaflet + CARTO tiles) --
   var LEAFLET_VERSION = '1.9.4';
 
   function initMap() {
@@ -944,16 +944,17 @@
       mapInstance.attributionControl.setPrefix(false);
     }
 
-    var ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
-    L.tileLayer(ESRI + 'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ &middot; &copy; <a href="https://www.openstreetmap.org/copyright" target="_parent">OpenStreetMap</a> contributors',
-      maxNativeZoom: 16,
-      maxZoom: 19
+    var CARTO_KEY = 'cb1_4bwr_1_3fb5de8a08742264936d0d35';
+
+    L.tileLayer('https://basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png?key=' + CARTO_KEY, {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_parent">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_parent">CARTO</a>',
+      maxZoom: 20,
+      detectRetina: true
     }).addTo(mapInstance);
 
-    L.tileLayer(ESRI + 'Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
-      maxNativeZoom: 16,
-      maxZoom: 19
+    L.tileLayer('https://basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png?key=' + CARTO_KEY, {
+      maxZoom: 20,
+      detectRetina: true
     }).addTo(mapInstance);
 
     L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
