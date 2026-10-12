@@ -100,7 +100,7 @@
 
   /* View toggle */
   .view-toggle {
-    margin-left: auto;
+    margin-left: 0;
     display: flex;
     background: #f1f3f4;
     border-radius: 20px;
@@ -127,6 +127,45 @@
   .vt-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
   .vt-btn.active { background: #fff; color: #1f1f1f; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
   .vt-btn:hover:not(.active) { color: #3c4043; }
+
+  /* Session filter */
+  .filter-wrap { position: relative; margin-left: auto; flex-shrink: 0; }
+  .filter-toggle {
+    position: relative; display: flex; align-items: center; gap: 5px;
+    background: none; border: 1px solid #dadce0; border-radius: 20px;
+    padding: 6px 13px; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 500;
+    color: #3c4043; cursor: pointer; white-space: nowrap; transition: background 0.15s;
+  }
+  .filter-toggle:hover, .filter-toggle[aria-expanded="true"] { background: #f1f3f4; }
+  .filter-toggle svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .filter-toggle.filtered { border-color: #1a73e8; color: #1a73e8; background: #e8f0fe; }
+  .filter-dot { display: none; width: 7px; height: 7px; border-radius: 50%; background: #1a73e8; }
+  .filter-toggle.filtered .filter-dot { display: block; }
+  .filter-menu {
+    position: absolute; top: calc(100% + 8px); right: 0; z-index: 999; min-width: 170px;
+    background: #fff; border-radius: 14px; padding: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12), 0 12px 36px rgba(0,0,0,0.12);
+    opacity: 0; pointer-events: none; transform: translateY(-6px) scale(0.97); transform-origin: top right;
+    transition: opacity 0.18s, transform 0.18s;
+  }
+  .filter-menu.open { opacity: 1; pointer-events: auto; transform: none; }
+  .filter-opt {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    font-family: 'Sora', sans-serif; font-size: 13px; color: #3c4043;
+    padding: 9px 12px; border-radius: 8px; cursor: pointer; transition: background 0.12s;
+  }
+  .filter-opt:hover { background: #f1f3f4; }
+  .filter-opt.active { background: #e8f0fe; color: #1a73e8; font-weight: 600; }
+  .no-sessions-note {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    z-index: 500; background: rgba(255,255,255,0.95); padding: 10px 16px; border-radius: 12px;
+    font-size: 13px; color: #5f6368; box-shadow: 0 2px 10px rgba(0,0,0,0.12); display: none;
+  }
+
+  /* Shown when a session photo fails to load */
+  img.img-fallback {
+    object-fit: contain !important; background: #f1f3f4; padding: 10px;
+  }
 
   /* Month picker */
   .month-picker {
@@ -568,6 +607,8 @@
     .today-btn { padding: 5px 10px; font-size: 12px; }
     .vt-btn { font-size: 11px; padding: 5px 9px; }
     .vt-btn svg { display: none; }
+    .filter-toggle { padding: 6px 9px; }
+    .filter-toggle span { display: none; }
     .cal-wrap.map-mode { padding-bottom: 16px; }
     #map-view { border-radius: 16px; }
   }
@@ -601,6 +642,19 @@
       <div class="mp-grid" id="mp-grid"></div>
     </div>
 
+    <!-- Filter button + menu -->
+    <div class="filter-wrap" id="filter-wrap">
+      <button class="filter-toggle" id="filter-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Filter sessions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <span>Filter</span>
+        <i class="filter-dot" id="filter-dot"></i>
+      </button>
+      <div class="filter-menu" id="filter-menu" role="menu">
+        <button class="filter-opt" type="button" role="menuitemradio" aria-checked="false" data-filter="under16">For Under 16s</button>
+        <button class="filter-opt active" type="button" role="menuitemradio" aria-checked="true" data-filter="over16">For Over 16s</button>
+      </div>
+    </div>
+
     <!-- View toggle -->
     <div class="view-toggle">
       <button class="vt-btn active" id="vt-calendar">
@@ -627,6 +681,7 @@
   <!-- Map view (hidden by default) -->
   <div id="map-view" style="display:none">
     <div id="leaflet-map"></div>
+    <div class="no-sessions-note" id="map-empty-note">No sessions match this filter.</div>
   </div>
 </div>
 
@@ -668,6 +723,7 @@
   var SESSIONS = {
     learn:     {
       label:'Learn Chess',
+      under16:true,
       color:'#3C3489',
       bg:'#EEEDFE',
       dot:'#3C3489',
@@ -685,15 +741,15 @@
         'https://mkchess.co.uk/assets/images/image51.jpg?v=5efaad71'
       ]
     },
-    bletchley: { label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 - 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
-    badminton: { label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 - 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
+    bletchley: { under16:true, label:'Play Chess',  color:'#0F6E56', bg:'#E1F5EE', dot:'#0F6E56', time:'6:00 - 7:30 PM', location:'South Central IOT, Bletchley MK3 6DR', desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#bletchley',   img:'https://mkchess.co.uk/assets/images/image78.jpg?v=a0f4c5bf' },
+    badminton: { under16:true, label:'Play Chess',  color:'#993C1D', bg:'#FAECE7', dot:'#993C1D', time:'6:00 - 7:30 PM', location:'National Badminton Centre, MK8 9LA',   desc:'Casual play for all ages & abilities.',              url:'https://mkchess.co.uk/#nextevent',   img:'https://mkchess.co.uk/assets/images/image79.jpg?v=a0f4c5bf' },
     sunday:    { label:'Adults',      color:'#92400E', bg:'#FEF3E2', dot:'#B45309', time:'10:00 - 11:30 AM', location:'Willen Lake Cafe, MK15 0DS',          desc:'Relaxed adults session overlooking the lake.',       url:'https://mkchess.co.uk/#willen-lake', img:'https://mkchess.co.uk/assets/images/image07.jpg?v=8bcf13e8' },
     lionsun:   { label:'Adults Chess', color:'#6B21A8', bg:'#F3E8FF', dot:'#6B21A8', time:'6:00 - 8:00 PM',   location:'Lion & Sun Tavern, MK13 0DX',         desc:'Weekly adult session. Unhosted, casual play.',       url:'https://mkchess.co.uk/#lion-sun-tavern', img:'https://mkchess.co.uk/assets/images/image02.jpg?v=323ffd2e',
       gallery:[
         'https://mkchess.co.uk/assets/images/image02.jpg?v=323ffd2e',
         'https://mkchess.co.uk/assets/images/image28.jpg?v=323ffd2e',
         'https://mkchess.co.uk/assets/images/image90.jpg?v=323ffd2e',
-        'https://mkchess.co.uk/assets/images/image51.jpg?v=323ffd2e'
+        'https://mkchess.co.uk/assets/images/image51.jpg?v=5efaad71'
       ]
     },
   };
@@ -712,12 +768,22 @@
   var currentView = 'calendar';
   var calWrap = document.getElementById('cal-wrap');
   var mapInstance = null;
+  var mapMarkers = {};              // venue key -> Leaflet marker
+  var currentFilter = 'over16';     // 'under16' | 'over16' (over16 = every session)
+  var FALLBACK_IMG = 'logo.png';    // shown if a session photo fails to load
+
+  // 'For Under 16s' = sessions flagged under16; 'For Over 16s' and 'All' = every session
+  function sessionMatchesFilter(key) {
+    if (currentFilter === 'under16') return !!(SESSIONS[key] && SESSIONS[key].under16);
+    return true;
+  }
 
   var usingTouch = false;
   window.addEventListener('touchstart', function(){ usingTouch = true; }, { passive: true, once: true });
 
   function setSquareWidth() {
-    var overhead = 100;
+    var fb = document.getElementById('filter-bar');
+    var overhead = 100 + (fb ? fb.offsetHeight + 10 : 0);
     var gridHeight = window.innerHeight - overhead;
     var ideal = Math.round((gridHeight / 6) * 7 + 20);
     calWrap.style.maxWidth = Math.min(window.innerWidth, ideal) + 'px';
@@ -875,7 +941,7 @@
       mpGrid.appendChild(btn);
     });
   }
-  function openPicker()  { pickerYear=viewYear; pickerOpen=true;  titleBtn.classList.add('open');    renderPicker(); pickerEl.classList.add('open'); }
+  function openPicker()  { setFilterMenu(false); pickerYear=viewYear; pickerOpen=true;  titleBtn.classList.add('open');    renderPicker(); pickerEl.classList.add('open'); }
   function closePicker() {                      pickerOpen=false; titleBtn.classList.remove('open'); pickerEl.classList.remove('open'); }
 
   titleBtn.addEventListener('click', function(e){ e.stopPropagation(); pickerOpen ? closePicker() : openPicker(); });
@@ -916,7 +982,7 @@
   var LEAFLET_VERSION = '1.9.4';
 
   function initMap() {
-    if (mapInstance) { mapInstance.invalidateSize(); return; }
+    if (mapInstance) { mapInstance.invalidateSize(); applyMapFilter(); return; }
     if (typeof L !== 'undefined') { _createMap(); return; }
     var css = document.createElement('link');
     css.rel = 'stylesheet';
@@ -969,11 +1035,60 @@
       mapInstance.closePopup();
     }, { passive: true });
 
-    var markers = VENUES.map(function(venue, idx){ return addVenueMarker(venue, idx); });
-    if (markers.length) {
-      mapInstance.fitBounds(L.featureGroup(markers).getBounds(), { padding: [56, 56], maxZoom: 13 });
+    VENUES.forEach(function(venue, idx){ mapMarkers[venue.key] = addVenueMarker(venue, idx); });
+    applyMapFilter();
+  }
+  function applyMapFilter() {
+    if (!mapInstance) return;
+    mapInstance.closePopup();
+    var visible = [];
+    VENUES.forEach(function(venue){
+      var marker = mapMarkers[venue.key];
+      if (!marker) return;
+      if (sessionMatchesFilter(venue.key)) {
+        if (!mapInstance.hasLayer(marker)) marker.addTo(mapInstance);
+        visible.push(marker);
+      } else if (mapInstance.hasLayer(marker)) {
+        mapInstance.removeLayer(marker);
+      }
+    });
+    document.getElementById('map-empty-note').style.display = visible.length ? 'none' : 'block';
+    if (visible.length) {
+      mapInstance.fitBounds(L.featureGroup(visible).getBounds(), { padding: [56, 56], maxZoom: 13 });
     }
   }
+
+  // -- Filter button + menu --
+  var filterToggle = document.getElementById('filter-toggle');
+  var filterMenu   = document.getElementById('filter-menu');
+  var filterOpts   = filterMenu.querySelectorAll('.filter-opt');
+  function setFilterMenu(open) {
+    filterMenu.classList.toggle('open', open);
+    filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  filterToggle.addEventListener('click', function(e){
+    e.stopPropagation();
+    closePicker(); hideTip();
+    setFilterMenu(!filterMenu.classList.contains('open'));
+  });
+  filterMenu.addEventListener('click', function(e){ e.stopPropagation(); });
+  document.addEventListener('click', function(){ setFilterMenu(false); });
+  Array.prototype.forEach.call(filterOpts, function(opt){
+    opt.addEventListener('click', function(){
+      var next = opt.getAttribute('data-filter');
+      setFilterMenu(false);
+      if (next === currentFilter) return;
+      currentFilter = next;
+      Array.prototype.forEach.call(filterOpts, function(o){
+        o.classList.toggle('active', o === opt);
+        o.setAttribute('aria-checked', o === opt ? 'true' : 'false');
+      });
+      filterToggle.classList.toggle('filtered', currentFilter !== 'over16');
+      hideTip();
+      if (currentView === 'calendar') render(); else applyMapFilter();
+    });
+  });
+
   function addVenueMarker(venue, idx) {
     var session  = SESSIONS[venue.key];
     var nextDate = getNextDate(venue.key);
@@ -995,8 +1110,10 @@
     var galleryImages = (Array.isArray(session.gallery) && session.gallery.length) ? session.gallery.slice() : [session.img];
     if (galleryImages.indexOf(session.img) === -1) galleryImages.unshift(session.img);
     var hasGallery = galleryImages.length > 1;
-    var gallerySlidesHTML = galleryImages.map(function(src){
-      return '<div class="map-popup-slide"><img class="map-popup-img" src="' + src + '" alt="' + session.label + '" loading="lazy"></div>';
+    var gallerySlidesHTML = galleryImages.map(function(src, slideIdx){
+      return '<div class="map-popup-slide"><img class="map-popup-img" src="' + src + '" alt="' + session.label + '"' +
+        (slideIdx === 0 ? '' : ' loading="lazy"') +
+        ' onerror="if(this.getAttribute(\'src\')!==\'' + FALLBACK_IMG + '\'){this.classList.add(\'img-fallback\');this.src=\'' + FALLBACK_IMG + '\';}"></div>';
     }).join('');
     var galleryControlsHTML = hasGallery
       ? (
@@ -1236,6 +1353,19 @@
   var ttLink    = document.getElementById('tt-link');
   var hideTimer = null;
   var tipVisible = false;
+  var ttSession = null;
+  var ttTried = [];
+  ttImg.addEventListener('error', function(){
+    if (ttImg.getAttribute('src') === FALLBACK_IMG) return;
+    var cur = ttImg.getAttribute('src');
+    if (ttTried.indexOf(cur) === -1) ttTried.push(cur);
+    var alts = (ttSession && ttSession.gallery) ? ttSession.gallery : [];
+    for (var i = 0; i < alts.length; i++) {
+      if (ttTried.indexOf(alts[i]) === -1) { ttImg.src = alts[i]; return; }
+    }
+    ttImg.classList.add('img-fallback');
+    ttImg.src = FALLBACK_IMG;
+  });
 
   var tipReqId = 0;
   function showTip(triggerEl, session, dateStr) {
@@ -1243,6 +1373,8 @@
     var reqId = ++tipReqId;
     function apply() {
       if (reqId !== tipReqId) return; // a newer hover has since taken over
+      ttSession = session; ttTried = [];
+      ttImg.classList.remove('img-fallback');
       ttImg.src = session.img; ttImg.style.display = 'block'; ttImgLink.href = session.url;
       ttDot.style.background = session.dot;
       ttTitle.textContent    = session.cancelled ? session.label + ' cancelled' : session.label;
@@ -1288,6 +1420,10 @@
     if (currentView !== 'calendar') return;
     var today = new Date(); today.setHours(0,0,0,0);
     var events = getEvents(viewYear, viewMonth);
+    Object.keys(events).forEach(function(day){
+      events[day] = events[day].filter(function(ev){ return sessionMatchesFilter(ev.key); });
+      if (!events[day].length) delete events[day];
+    });
     document.getElementById('cal-title-text').textContent = MONTHS[viewMonth] + ' ' + viewYear;
 
     var grid = document.getElementById('cal-grid');
